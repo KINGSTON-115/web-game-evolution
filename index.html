@@ -539,6 +539,23 @@
         <div id="progressFill"></div>
     </div>
     
+    <!-- 每日挑战 HUD -->
+    <div id="dailyChallenge">
+        <div class="daily-header">
+            <span class="daily-icon" id="dailyIcon">🎯</span>
+            <span class="daily-title" id="dailyTitle">每日挑战</span>
+            <span class="daily-status pending" id="dailyStatus">进行中</span>
+        </div>
+        <div class="daily-goal" id="dailyGoal">得分挑战：单局获得 100 分</div>
+        <div class="daily-progress">
+            <div class="daily-progress-fill" id="dailyProgressFill"></div>
+        </div>
+        <div class="daily-footer">
+            <span class="daily-reward" id="dailyReward">🎁 奖励: +50 分数</span>
+            <span class="daily-countdown" id="dailyCountdown">刷新: 12小时30分</span>
+        </div>
+    </div>
+    
     <!-- 游戏结束 -->
     <div id="gameOver">
         <h2>💀 游戏结束</h2>
@@ -1097,6 +1114,16 @@
                 Shake.trigger(15, 200);
             },
             
+            // 🎖️ 实时检查成就解锁
+            checkAchievements() {
+                const newlyUnlocked = AchievementSys.checkAndUnlock();
+                newlyUnlocked.forEach(ach => {
+                    AchievementSys.showNotification(ach);
+                    // 成就解锁时轻微震动反馈
+                    Shake.trigger(8, 150);
+                });
+            },
+            
             // 敌潮警告
             triggerRushWarning() {
                 const warning = document.getElementById('rushWarning');
@@ -1210,6 +1237,9 @@
                 
                 // 🎯 检查里程碑
                 this.checkMilestones();
+                
+                // 🎖️ 检查成就解锁（实时）
+                this.checkAchievements();
                 
                 // 📊 更新进度条
                 this.updateProgressBar();
@@ -2254,16 +2284,21 @@
             },
             
             // 更新进度
-            updateProgress(value) {
+            addProgress(value) {
                 const data = this.getTodayData();
-                if (data.completed) return;
+                if (data.completed) return 0;
                 
-                data.progress = Math.max(data.progress, value);
+                // 累加进度
+                data.progress += value;
+                let bonus = 0;
                 
                 if (data.progress >= data.target) {
                     data.progress = data.target;
-                    data.completed = true;
-                    this.showCompleteModal(data);
+                    if (!data.completed) {
+                        data.completed = true;
+                        bonus = data.reward;
+                        this.showCompleteModal(data);
+                    }
                 }
                 
                 localStorage.setItem(this.storageKey, JSON.stringify(data));
