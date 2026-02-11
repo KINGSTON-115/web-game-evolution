@@ -84,6 +84,8 @@
             cursor: pointer;
             transition: transform 0.1s, box-shadow 0.1s;
             box-shadow: 0 10px 40px rgba(255, 107, 107, 0.4);
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         
         #startBtn:active {
@@ -244,6 +246,8 @@
             cursor: pointer;
             transition: transform 0.1s;
             animation: pulse 1.5s infinite;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
         }
         
         #restartBtn:active {
@@ -1965,6 +1969,414 @@
                 // 渲染成就
                 AchievementSys.render('achievementList');
             }, 500);
+        };
+    </script>
+    
+    <!-- 每日挑战系统 -->
+    <style>
+        /* 每日挑战样式 */
+        #dailyChallenge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            min-width: 180px;
+            z-index: 6;
+            display: none; /* 默认隐藏，开始游戏后显示 */
+        }
+        
+        #dailyChallenge.active {
+            display: block;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .daily-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .daily-icon {
+            font-size: 20px;
+        }
+        
+        .daily-title {
+            color: #ffd700;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .daily-status {
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            margin-left: auto;
+        }
+        
+        .daily-status.pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+        }
+        
+        .daily-status.completed {
+            background: rgba(76, 175, 80, 0.2);
+            color: #4caf50;
+        }
+        
+        .daily-goal {
+            color: #fff;
+            font-size: 13px;
+            margin-bottom: 8px;
+            line-height: 1.4;
+        }
+        
+        .daily-progress {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .daily-progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .daily-reward {
+            color: #4caf50;
+            font-size: 11px;
+            margin-bottom: 5px;
+        }
+        
+        .daily-countdown {
+            color: #888;
+            font-size: 10px;
+            text-align: right;
+        }
+        
+        /* 每日挑战完成弹窗 */
+        #dailyCompleteModal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+        
+        #dailyCompleteModal.show {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        .daily-modal-content {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.15));
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            border: 2px solid rgba(255, 215, 0, 0.4);
+            max-width: 320px;
+            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        .daily-modal-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+        
+        .daily-modal-title {
+            color: #ffd700;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .daily-modal-desc {
+            color: #fff;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .daily-modal-reward {
+            color: #4caf50;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 25px;
+        }
+        
+        .daily-modal-btn {
+            padding: 12px 40px;
+            font-size: 16px;
+            background: linear-gradient(135deg, #ffd700, #ff9500);
+            border: none;
+            border-radius: 30px;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .daily-modal-btn:active {
+            transform: scale(0.95);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+    </style>
+    
+    <!-- 每日挑战弹窗 -->
+    <div id="dailyCompleteModal">
+        <div class="daily-modal-content">
+            <div class="daily-modal-icon">🎉</div>
+            <div class="daily-modal-title">每日挑战完成!</div>
+            <div class="daily-modal-desc" id="dailyModalDesc">你今天的表现太棒了!</div>
+            <div class="daily-modal-reward" id="dailyModalReward">+50 额外分数</div>
+            <button class="daily-modal-btn" onclick="DailyChallenge.closeModal()">继续游戏</button>
+        </div>
+    </div>
+    
+    <script>
+        // ===============================
+        // 每日挑战系统
+        // ===============================
+        const DailyChallenge = {
+            storageKey: 'blockEater_dailyChallenge',
+            
+            // 挑战类型配置
+            challenges: [
+                { type: 'score', icon: '🎯', title: '得分挑战', desc: '单局获得 {target} 分', reward: 50 },
+                { type: 'combo', icon: '🔥', title: '连击挑战', desc: '达成 {target} 连击', reward: 30 },
+                { type: 'eat', icon: '🍽️', title: '吞噬挑战', desc: '吞噬 {target} 个方块', reward: 40 },
+                { type: 'size', icon: '📈', title: '成长挑战', desc: '体型达到 {target}', reward: 60 }
+            ],
+            
+            // 获取今天的挑战数据
+            getTodayData() {
+                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+                const stored = localStorage.getItem(this.storageKey);
+                let data = stored ? JSON.parse(stored) : {};
+                
+                if (data.date !== today) {
+                    // 新的一天，生成新挑战
+                    const challengeType = this.challenges[Math.floor(Math.random() * this.challenges.length)];
+                    const difficulty = Math.floor(Math.random() * 3) + 1; // 1-3 难度
+                    
+                    let target;
+                    switch(challengeType.type) {
+                        case 'score': target = 100 * difficulty * difficulty; break;
+                        case 'combo': target = 10 * difficulty; break;
+                        case 'eat': target = 20 * difficulty; break;
+                        case 'size': target = 50 + difficulty * 20; break;
+                    }
+                    
+                    data = {
+                        date: today,
+                        type: challengeType.type,
+                        icon: challengeType.icon,
+                        title: challengeType.title,
+                        desc: challengeType.desc,
+                        target: target,
+                        reward: challengeType.reward * difficulty,
+                        progress: 0,
+                        completed: false
+                    };
+                    localStorage.setItem(this.storageKey, JSON.stringify(data));
+                }
+                
+                return data;
+            },
+            
+            // 初始化显示
+            init() {
+                const data = this.getTodayData();
+                const container = document.getElementById('dailyChallenge');
+                const goalEl = document.getElementById('dailyGoal');
+                const progressFill = document.getElementById('dailyProgressFill');
+                const rewardEl = document.getElementById('dailyReward');
+                const countdownEl = document.getElementById('dailyCountdown');
+                const statusEl = document.getElementById('dailyStatus');
+                
+                if (data.completed) {
+                    statusEl.textContent = '已完成';
+                    statusEl.className = 'daily-status completed';
+                } else {
+                    statusEl.textContent = '进行中';
+                    statusEl.className = 'daily-status pending';
+                }
+                
+                goalEl.textContent = data.desc.replace('{target}', data.target);
+                rewardEl.textContent = `🎁 奖励: +${data.reward} 分数`;
+                
+                const progress = Math.min(100, (data.progress / data.target) * 100);
+                progressFill.style.width = `${progress}%`;
+                
+                // 倒计时
+                this.updateCountdown();
+                setInterval(() => this.updateCountdown(), 60000); // 每分钟更新
+                
+                container.classList.add('active');
+            },
+            
+            // 更新倒计时
+            updateCountdown() {
+                const now = new Date();
+                const tomorrow = new Date(now);
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                
+                const diff = tomorrow - now;
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                
+                document.getElementById('dailyCountdown').textContent = 
+                    `刷新: ${hours}小时${minutes}分钟`;
+            },
+            
+            // 更新进度
+            updateProgress(value) {
+                const data = this.getTodayData();
+                if (data.completed) return;
+                
+                data.progress = Math.max(data.progress, value);
+                
+                if (data.progress >= data.target) {
+                    data.progress = data.target;
+                    data.completed = true;
+                    this.showCompleteModal(data);
+                }
+                
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+                
+                // 更新 UI
+                const progressFill = document.getElementById('dailyProgressFill');
+                const progress = Math.min(100, (data.progress / data.target) * 100);
+                progressFill.style.width = `${progress}%`;
+                
+                if (data.completed) {
+                    document.getElementById('dailyStatus').textContent = '已完成';
+                    document.getElementById('dailyStatus').className = 'daily-status completed';
+                }
+            },
+            
+            // 进度增加（用于游戏过程中）
+            addProgress(value) {
+                const data = this.getTodayData();
+                if (data.completed) return 0;
+                
+                data.progress += value;
+                let bonus = 0;
+                
+                if (data.progress >= data.target) {
+                    data.progress = data.target;
+                    data.completed = true;
+                    bonus = data.reward;
+                    this.showCompleteModal(data);
+                }
+                
+                localStorage.setItem(this.storageKey, JSON.stringify(data));
+                
+                // 更新 UI
+                const progressFill = document.getElementById('dailyProgressFill');
+                const progress = Math.min(100, (data.progress / data.target) * 100);
+                progressFill.style.width = `${progress}%`;
+                
+                if (data.completed) {
+                    document.getElementById('dailyStatus').textContent = '已完成';
+                    document.getElementById('dailyStatus').className = 'daily-status completed';
+                }
+                
+                return bonus;
+            },
+            
+            // 显示完成弹窗
+            showCompleteModal(data) {
+                const modal = document.getElementById('dailyCompleteModal');
+                document.getElementById('dailyModalDesc').textContent = 
+                    `恭喜完成「${data.title}」!`;
+                document.getElementById('dailyModalReward').textContent = 
+                    `+${data.reward} 额外分数已入账!`;
+                modal.classList.add('show');
+                
+                // 播放音效
+                AudioSys.play('powerup');
+            },
+            
+            // 关闭弹窗
+            closeModal() {
+                document.getElementById('dailyCompleteModal').classList.remove('show');
+            },
+            
+            // 获取奖励
+            getReward() {
+                const data = this.getTodayData();
+                return data.completed ? data.reward : 0;
+            },
+            
+            // 在游戏结束时应用奖励
+            applyReward() {
+                const reward = this.getReward();
+                if (reward > 0) {
+                    // 将奖励添加到玩家分数（仅用于展示）
+                    // 实际奖励在游戏过程中已经记录
+                }
+                return reward;
+            }
+        };
+        
+        // 在游戏开始时初始化每日挑战
+        const _originalStart = Game.start;
+        Game.start = function() {
+            _originalStart.call(this);
+            DailyChallenge.init();
+        };
+        
+        // 在吞噬时更新每日挑战进度
+        const _originalEat = Game.eatEnemy;
+        Game.eatEnemy = function(enemy, index) {
+            const data = DailyChallenge.getTodayData();
+            
+            // 根据挑战类型更新进度
+            if (data.type === 'eat') {
+                DailyChallenge.addProgress(1);
+            } else if (data.type === 'size') {
+                DailyChallenge.addProgress(Math.floor(this.player.size));
+            }
+            
+            _originalEat.call(this, enemy, index);
+        };
+        
+        // 在得分时更新每日挑战进度
+        const _originalUpdateCombo = Game.updateComboUI;
+        Game.updateComboUI = function() {
+            _originalUpdateCombo.call(this);
+            
+            const data = DailyChallenge.getTodayData();
+            if (data.type === 'score') {
+                DailyChallenge.addProgress(this.player.score);
+            } else if (data.type === 'combo') {
+                DailyChallenge.addProgress(this.player.combo);
+            }
         };
     </script>
 </body>
