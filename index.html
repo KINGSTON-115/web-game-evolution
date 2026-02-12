@@ -1000,10 +1000,16 @@
                 };
                 
                 // 按钮事件 (支持触摸设备)
-                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('startBtn').addEventListener('click', () => {
+                    AudioSys.init();  
+                    this.start();
+                });
                 document.getElementById('startBtn').addEventListener('touchend', (e) => {
                     e.preventDefault();
+                    {
+                    AudioSys.init();
                     this.start();
+                }
                 });
                 
                 document.getElementById('restartBtn').addEventListener('click', () => this.restart());
@@ -1156,7 +1162,10 @@
             
             restart() {
                 document.getElementById('gameOver').classList.remove('show');
-                this.start();
+                {
+                    AudioSys.init();
+                    this.start();
+                }
             },
             
             // 核心循环
