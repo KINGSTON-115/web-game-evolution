@@ -1002,24 +1002,24 @@
                 // 按钮事件 (支持触摸设备)
                 document.getElementById('startBtn').addEventListener('click', () => {
                     AudioSys.init();  
-                    this.start();
+                    Game.start();
                 });
                 document.getElementById('startBtn').addEventListener('touchend', (e) => {
                     e.preventDefault();
                     AudioSys.init();
-                    this.start();
+                    Game.start();
                 });
                 
                 document.getElementById('restartBtn').addEventListener('click', () => this.restart());
                 document.getElementById('restartBtn').addEventListener('touchend', (e) => {
                     e.preventDefault();
-                    this.restart();
+                    Game.restart();
                 });
                 
                 // 键盘空格重启
                 document.addEventListener('keydown', (e) => {
                     if (e.code === 'Space' && this.state === 'gameover') {
-                        this.restart();
+                        Game.restart();
                     }
                 });
             },
@@ -1162,7 +1162,7 @@
                 document.getElementById('gameOver').classList.remove('show');
                 {
                     AudioSys.init();
-                    this.start();
+                    Game.start();
                 }
             },
             
