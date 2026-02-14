@@ -1010,7 +1010,7 @@
                     Game.start();
                 });
                 
-                document.getElementById('restartBtn').addEventListener('click', () => this.restart());
+                document.getElementById('restartBtn').addEventListener('click', () => Game.restart());
                 document.getElementById('restartBtn').addEventListener('touchend', (e) => {
                     e.preventDefault();
                     Game.restart();
