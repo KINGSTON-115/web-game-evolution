@@ -17,6 +17,7 @@
         .score { background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px; color: #fff; }
         .score label { color: #888; font-size: 12px; }
         .score span { font-size: 24px; font-weight: bold; }
+        #timeEl { color: #4ade80; }
     </style>
 </head>
 <body>
@@ -24,18 +25,20 @@
     
     <div id="startScreen" class="screen">
         <h1>方块吞噬者</h1>
-        <p style="color:#888;margin-bottom:30px;">吃掉绿色，躲避红色！</p>
+        <p style="color:#888;margin-bottom:30px;">吃掉绿色小球，躲避红色大球！</p>
         <button id="startBtn" class="btn">开始游戏</button>
     </div>
     
     <div id="hud">
         <div class="score"><label>分数</label><br><span id="scoreEl">0</span></div>
+        <div class="score"><label>时间</label><br><span id="timeEl">0.0s</span></div>
         <div class="score"><label>最高</label><br><span id="highEl">0</span></div>
     </div>
     
     <div id="gameOverScreen" class="screen hidden">
         <h1 style="color:#ff6b6b;">游戏结束</h1>
         <p id="finalScore" style="color:#fff;font-size:24px;margin:20px 0;">得分: 0</p>
+        <p id="finalTime" style="color:#888;font-size:18px;margin-bottom:20px;">存活时间: 0s</p>
         <button id="restartBtn" class="btn btn2">再来一局</button>
     </div>
 
@@ -52,30 +55,49 @@
         window.addEventListener('resize', resize);
         
         // 游戏变量
-        let state = 'start'; // start, playing, gameover
+        let state = 'start';
         let score = 0;
         let highScore = parseInt(localStorage.getItem('bh_high')) || 0;
+        let gameTime = 0; // 存活时间（秒）
         
         const player = { x: 0, y: 0, size: 20, color: '#ff6b6b', tx: 0, ty: 0 };
         let enemies = [];
         let particles = [];
         let popups = [];
         let lastTime = 0;
+        let isPaused = false;
         
         // DOM 元素
         const startScreen = document.getElementById('startScreen');
         const gameOverScreen = document.getElementById('gameOverScreen');
         const hud = document.getElementById('hud');
         const scoreEl = document.getElementById('scoreEl');
+        const timeEl = document.getElementById('timeEl');
         const highEl = document.getElementById('highEl');
         const finalScore = document.getElementById('finalScore');
+        const finalTime = document.getElementById('finalTime');
         
         highEl.textContent = highScore;
         
-        // 生成敌人
-        function spawnEnemy() {
-            const size = 15 + Math.random() * 35;
+        // 根据存活时间计算难度
+        function getDifficultyMultiplier() {
+            // 每10秒难度增加一级，最大3倍
+            return 1 + Math.min(gameTime / 10, 2);
+        }
+        
+        // 生成敌人 - 确保始终有能吃的
+        function spawnEnemy(forceSafe) {
+            let size;
+            if (forceSafe || enemies.filter(e => e.size < player.size).length < 2) {
+                // 强制生成比玩家小的球
+                size = 10 + Math.random() * (player.size - 5);
+            } else {
+                // 正常随机生成
+                size = 15 + Math.random() * 35 * getDifficultyMultiplier();
+            }
+            
             const isDangerous = size > player.size;
+            
             let x, y;
             if (Math.random() < 0.5) {
                 x = Math.random() < 0.5 ? -size : canvas.width + size;
@@ -84,13 +106,16 @@
                 x = Math.random() * canvas.width;
                 y = Math.random() < 0.5 ? -size : canvas.height + size;
             }
+            
+            const speed = (1 + Math.random() * 2) * getDifficultyMultiplier();
             const angle = Math.random() * Math.PI * 2;
-            const speed = 1.5 + Math.random() * 2;
+            
             enemies.push({
                 x: x, y: y, size: size,
                 color: isDangerous ? '#ee5a24' : '#4ade80',
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed
+                vy: Math.sin(angle) * speed,
+                baseSpeed: speed
             });
         }
         
@@ -112,6 +137,7 @@
         function startGame() {
             state = 'playing';
             score = 0;
+            gameTime = 0;
             player.x = canvas.width / 2;
             player.y = canvas.height / 2;
             player.tx = player.x;
@@ -122,12 +148,19 @@
             popups = [];
             lastTime = 0;
             
-            for (let i = 0; i < 8; i++) spawnEnemy();
+            // 生成初始敌人 - 确保有能吃的
+            for (let i = 0; i < 6; i++) {
+                spawnEnemy(true); // 强制生成能吃的
+            }
+            for (let i = 0; i < 4; i++) {
+                spawnEnemy(false);
+            }
             
             startScreen.classList.add('hidden');
             gameOverScreen.classList.add('hidden');
             hud.style.display = 'flex';
             scoreEl.textContent = '0';
+            timeEl.textContent = '0.0s';
         }
         
         // 结束游戏
@@ -139,14 +172,20 @@
                 highEl.textContent = highScore;
             }
             finalScore.textContent = '得分: ' + score;
+            finalTime.textContent = '存活时间: ' + gameTime.toFixed(1) + 's';
             gameOverScreen.classList.remove('hidden');
             hud.style.display = 'none';
         }
         
         // 主循环
         function loop(time) {
-            const dt = time - lastTime || 16;
+            const dt = (time - lastTime) / 1000; // 转换为秒
             lastTime = time;
+            
+            if (state === 'playing') {
+                gameTime += dt;
+                timeEl.textContent = gameTime.toFixed(1) + 's';
+            }
             
             // 背景
             ctx.fillStyle = '#1a1a2e';
@@ -159,8 +198,16 @@
                 player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
                 player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
                 
-                // 生成敌人
-                if (enemies.length < 15 && Math.random() < 0.02) spawnEnemy();
+                // 确保始终有能吃的球
+                const edibleCount = enemies.filter(e => e.size < player.size).length;
+                if (edibleCount < 3) {
+                    spawnEnemy(true);
+                }
+                
+                // 逐渐增加敌人数量
+                if (enemies.length < 8 + Math.floor(gameTime / 5) && Math.random() < 0.03) {
+                    spawnEnemy(false);
+                }
                 
                 // 更新敌人
                 for (let i = enemies.length - 1; i >= 0; i--) {
@@ -193,6 +240,10 @@
                 
                 // 绘制敌人
                 enemies.forEach(e => {
+                    // 根据当前玩家大小更新颜色
+                    const isDangerous = e.size > player.size;
+                    e.color = isDangerous ? '#ee5a24' : '#4ade80';
+                    
                     ctx.beginPath();
                     ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
                     ctx.fillStyle = e.color;
