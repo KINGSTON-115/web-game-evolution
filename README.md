@@ -184,6 +184,6 @@ if (Math.random() < 0.1) {  // 10%概率
 
 ---
 
-**Made with ❤️ by [ZhenWeisi](https://github.com/zhenvis)**
+**Made with ❤️ by [KINGSTON-115](https://github.com/zhenvis)**
 
 *永不停歇的进化*

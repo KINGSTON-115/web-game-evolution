@@ -57,9 +57,9 @@ python3 -m http.server 8080
 | # | Skill | 任务 | 负责人 |
 |---|--------|------|--------|
 | 1 | **github** | 代码版本管理 | Coder |
-| 2 | **team-tasks** | 任务追踪 | 臻维斯 |
-| 3 | **video-processor** | 游戏录屏 | 臻维斯 |
-| 4 | **multi-agent-orchestrator** | 需求拆解 | 臻维斯 |
+| 2 | **team-tasks** | 任务追踪 | KINGSTON-115 |
+| 3 | **video-processor** | 游戏录屏 | KINGSTON-115 |
+| 4 | **multi-agent-orchestrator** | 需求拆解 | KINGSTON-115 |
 
 ### 子代理分配
 
