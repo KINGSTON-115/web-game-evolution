@@ -3,35 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>方块吞噬者 - Block Eater</title>
+    <title>方块吞噬者 - 修复版</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-user-select: none;
-        }
-        
-        body {
-            background: #1a1a2e;
-            overflow: hidden;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: #1a1a2e; 
+            overflow: hidden; 
             font-family: 'Segoe UI', system-ui, sans-serif;
             touch-action: none;
         }
-        
-        #gameCanvas {
-            display: block;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        #gameCanvas { 
+            display: block; 
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
         }
-        
-        /* 开始界面 - 3秒上手 */
         #startScreen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -39,40 +27,12 @@
             background: rgba(26, 26, 46, 0.95);
             z-index: 10;
         }
-        
         #startScreen h1 {
             font-size: clamp(32px, 8vw, 64px);
             color: #fff;
             margin-bottom: 20px;
             text-shadow: 0 0 30px rgba(255, 107, 107, 0.5);
         }
-        
-        #startScreen .subtitle {
-            color: #888;
-            margin-bottom: 40px;
-            font-size: clamp(14px, 3vw, 18px);
-        }
-        
-        .hint {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            margin: 10px 0;
-            color: #aaa;
-            font-size: clamp(12px, 2.5vw, 16px);
-        }
-        
-        .hint-icon {
-            width: 50px;
-            height: 50px;
-            background: #ff6b6b;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-        }
-        
         #startBtn {
             margin-top: 40px;
             padding: 20px 60px;
@@ -82,35 +42,18 @@
             border-radius: 50px;
             color: #fff;
             cursor: pointer;
-            transition: transform 0.1s, box-shadow 0.1s;
             box-shadow: 0 10px 40px rgba(255, 107, 107, 0.4);
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
         }
-        
-        #startBtn:active {
-            transform: scale(0.95);
-        }
-        
-        /* 游戏HUD */
         #hud {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            display: flex;
+            top: 20px; left: 20px; right: 20px;
+            display: none;
             flex-direction: column;
             gap: 10px;
             pointer-events: none;
             z-index: 5;
         }
-        
-        .score-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 15px;
-        }
-        
+        .score-row { display: flex; justify-content: space-between; gap: 15px; }
         .score-box {
             background: rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(10px);
@@ -119,384 +62,42 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
             flex: 1;
         }
-        
-        .score-label {
-            color: #888;
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        
-        .score-value {
-            color: #fff;
-            font-size: clamp(20px, 4vw, 28px);
-            font-weight: bold;
-        }
-        
-        /* 连击条 (Combo Bar) */
-        #comboContainer {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 8px 15px;
-            border-radius: 10px;
-            border: 1px solid rgba(255, 217, 61, 0.3);
-            display: none; /* 默认隐藏 */
-            align-items: center;
-            gap: 12px;
-            height: 40px;
-            box-shadow: 0 0 20px rgba(255, 217, 61, 0.1);
-        }
-        
-        #comboContainer.active {
-            display: flex;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        #comboLabel {
-            color: #ffd93d;
-            font-size: 16px;
-            font-weight: 900;
-            font-style: italic;
-            white-space: nowrap;
-            text-shadow: 0 0 10px rgba(255, 217, 61, 0.6);
-            min-width: 80px;
-        }
-        
-        #comboBarBg {
-            flex: 1;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        #comboBarFill {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(90deg, #ffd93d, #ff6b6b);
-            border-radius: 4px;
-            transition: width 0.1s linear, background 0.3s;
-            box-shadow: 0 0 10px currentColor;
-        }
-        
-        #comboDisplay {
+        .score-label { color: #888; font-size: 14px; }
+        .score-value { color: #fff; font-size: 24px; font-weight: bold; }
+        #gameOverScreen {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: clamp(40px, 10vw, 80px);
-            font-weight: bold;
-            color: #ff6b6b;
-            text-shadow: 0 0 30px rgba(255, 107, 107, 0.8);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 3;
-        }
-        
-        /* 游戏结束 - 极短重开路径 */
-        #gameOver {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.85);
+            top: 0; left: 0;
+            width: 100%; height: 100%;
             display: none;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 20;
+            background: rgba(26, 26, 46, 0.95);
+            z-index: 10;
         }
-        
-        #gameOver.show {
-            display: flex;
-        }
-        
-        #gameOver h2 {
-            color: #ff6b6b;
-            font-size: clamp(36px, 8vw, 72px);
-            margin-bottom: 20px;
-        }
-        
-        #finalScore {
-            color: #fff;
-            font-size: clamp(24px, 5vw, 48px);
-            margin-bottom: 10px;
-        }
-        
-        #bestScore {
-            color: #ffd93d;
-            font-size: clamp(16px, 3vw, 24px);
-            margin-bottom: 40px;
-        }
-        
+        #gameOverScreen h2 { color: #ff6b6b; font-size: 48px; margin-bottom: 20px; }
+        #finalScore { color: #fff; font-size: 32px; margin-bottom: 30px; }
         #restartBtn {
             padding: 15px 50px;
-            font-size: clamp(16px, 3.5vw, 20px);
+            font-size: 20px;
             background: linear-gradient(135deg, #6c5ce7, #a29bfe);
             border: none;
             border-radius: 50px;
             color: #fff;
             cursor: pointer;
-            transition: transform 0.1s;
-            animation: pulse 1.5s infinite;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        #restartBtn:active {
-            transform: scale(0.95);
-        }
-        
-        @keyframes pulse {
-            0%, 100% { box-shadow: 0 0 20px rgba(108, 92, 231, 0.5); }
-            50% { box-shadow: 0 0 40px rgba(108, 92, 231, 0.8); }
-        }
-        
-        /* 大连击冲击波文字 */
-        #comboBlast {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.5);
-            font-size: clamp(60px, 15vw, 120px);
-            font-weight: 900;
-            color: #fff;
-            text-shadow: 
-                0 0 10px #ff0000,
-                0 0 20px #ff00ff,
-                0 0 40px #ff00ff,
-                0 0 80px #ffd700;
-            opacity: 0;
-            pointer-events: none;
-            z-index: 4;
-            white-space: nowrap;
-            letter-spacing: 4px;
-            animation: none;
-        }
-        
-        #comboBlast.active {
-            animation: comboBlastAnim 1s ease-out forwards;
-        }
-        
-        @keyframes comboBlastAnim {
-            0% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(0.3) rotate(-10deg);
-            }
-            20% {
-                opacity: 1;
-                transform: translate(-50%, -50%) scale(1.2) rotate(5deg);
-            }
-            100% {
-                opacity: 0;
-                transform: translate(-50%, -50%) scale(1.5) rotate(0deg);
-            }
-        }
-        
-        /* 大连击闪光效果 */
-        #comboFlash {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle, rgba(255,215,0,0.3) 0%, transparent 70%);
-            opacity: 0;
-            pointer-events: none;
-            z-index: 2;
-        }
-        
-        #comboFlash.active {
-            animation: comboFlashAnim 0.5s ease-out forwards;
-        }
-        
-        @keyframes comboFlashAnim {
-            0% { opacity: 0; }
-            30% { opacity: 1; }
-            100% { opacity: 0; }
-        }
-        
-        /* 背景脉动动画 */
-        @keyframes bgPulse {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.3); }
-        }
-        
-        body.bgPulse {
-            animation: bgPulse 0.3s ease-in-out 2;
-        }
-
-        /* 视觉引导动画 */
-        .visual-hint {
-            position: absolute;
-            top: 50%;
-            left: 30%;
-            transform: translate(-50%, -50%);
-            opacity: 0;
-            animation: visualHintAnim 2s ease-in-out infinite;
-        }
-
-        @keyframes visualHintAnim {
-            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
-            20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            100% { opacity: 0; transform: translate(-50%, -50%) scale(1.2); }
-        }
-
-        #hintDot {
-            width: 20px;
-            height: 20px;
-            background: #ff6b6b;
-            border-radius: 50%;
-            display: inline-block;
-            animation: hintDotMove 2s ease-in-out infinite;
-        }
-
-        @keyframes hintDotMove {
-            0%, 100% { transform: translateX(0); }
-            50% { transform: translateX(60px); }
-        }
-
-        /* 里程碑成就系统 */
-        #milestoneContainer {
-            position: absolute;
-            top: 120px;
-            left: 20px;
-            display: flex;
-            gap: 8px;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        .milestone {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            opacity: 0.3;
-            transition: all 0.3s ease;
-            filter: grayscale(1);
-        }
-
-        .milestone.unlocked {
-            opacity: 1;
-            filter: grayscale(0);
-            animation: milestonePulse 0.5s ease-out;
-        }
-
-        .milestone.unlocked::after {
-            content: attr(data-title);
-            position: absolute;
-            bottom: -24px;
-            font-size: 10px;
-            white-space: nowrap;
-            color: #ffd700;
-            text-shadow: 0 0 5px rgba(0,0,0,0.8);
-        }
-
-        @keyframes milestonePulse {
-            0% { transform: scale(1.5); }
-            50% { transform: scale(0.9); }
-            100% { transform: scale(1); }
-        }
-
-        /* 敌潮警告 */
-        #rushWarning {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: 4px solid transparent;
-            pointer-events: none;
-            opacity: 0;
-            z-index: 4;
-        }
-
-        #rushWarning.active {
-            animation: rushBorder 0.5s ease-in-out 3;
-        }
-
-        @keyframes rushBorder {
-            0%, 100% { border-color: transparent; opacity: 1; }
-            50% { border-color: #ff0000; opacity: 0.8; }
-        }
-
-        /* 进度条 */
-        #progressBar {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 200px;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-            z-index: 5;
-        }
-
-        #progressFill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ff6b6b, #ffd93d);
-            border-radius: 4px;
-            transition: width 0.3s ease;
-        }
-
-        #progressLabel {
-            position: absolute;
-            bottom: 32px;
-            left: 50%;
-            transform: translateX(-50%);
-            color: #888;
-            font-size: 12px;
-            z-index: 5;
-        }
-
-        /* 移动端提示 */
-        @media (max-width: 768px) {
-            .hint {
-                flex-direction: column;
-                gap: 10px;
-            }
-            #progressBar {
-                width: 150px;
-            }
         }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     
-    <!-- 开始界面 -->
     <div id="startScreen">
-        <h1>🎮 方块吞噬者</h1>
-        <p class="subtitle">Block Eater</p>
-        
-        <!-- 零教学：只用视觉引导 -->
-        <div class="visual-hint" id="visualHint">
-            <div class="hint-dot" id="hintDot">●</div>
-            <div class="hint-arrow" id="hintArrow">→</div>
-        </div>
-        
+        <h1>方块吞噬者</h1>
+        <p style="color:#888;margin-bottom:30px;">吃掉小方块，躲避大方块！</p>
         <button id="startBtn">▶ 开始游戏</button>
     </div>
     
-    <!-- HUD -->
-    <div id="hud" style="display: none;">
+    <div id="hud">
         <div class="score-row">
             <div class="score-box">
                 <div class="score-label">分数</div>
@@ -507,1919 +108,274 @@
                 <div class="score-value" id="highScore">0</div>
             </div>
         </div>
-        <div id="comboContainer">
-            <div id="comboLabel">0x COMBO!</div>
-            <div id="comboBarBg">
-                <div id="comboBarFill"></div>
-            </div>
-        </div>
     </div>
     
-    <!-- 连击显示 -->
-    <div id="comboDisplay"></div>
-    
-    <!-- 大连击特效 -->
-    <div id="comboBlast"></div>
-    <div id="comboFlash"></div>
-
-    <!-- 里程碑成就 -->
-    <div id="milestoneContainer">
-        <div class="milestone" data-milestone="30" data-title="新手">🌱</div>
-        <div class="milestone" data-milestone="50" data-title="老手">🌿</div>
-        <div class="milestone" data-milestone="80" data-title="专家">🌳</div>
-        <div class="milestone" data-milestone="120" data-title="传说">🏆</div>
-    </div>
-
-    <!-- 敌潮警告 -->
-    <div id="rushWarning"></div>
-
-    <!-- 进度条 -->
-    <div id="progressLabel">进化进度</div>
-    <div id="progressBar">
-        <div id="progressFill"></div>
-    </div>
-    
-    <!-- 每日挑战 HUD -->
-    <div id="dailyChallenge">
-        <div class="daily-header">
-            <span class="daily-icon" id="dailyIcon">🎯</span>
-            <span class="daily-title" id="dailyTitle">每日挑战</span>
-            <span class="daily-status pending" id="dailyStatus">进行中</span>
-        </div>
-        <div class="daily-goal" id="dailyGoal">得分挑战：单局获得 100 分</div>
-        <div class="daily-progress">
-            <div class="daily-progress-fill" id="dailyProgressFill"></div>
-        </div>
-        <div class="daily-footer">
-            <span class="daily-reward" id="dailyReward">🎁 奖励: +50 分数</span>
-            <span class="daily-countdown" id="dailyCountdown">刷新: 12小时30分</span>
-        </div>
-    </div>
-    
-    <!-- 游戏结束 -->
-    <div id="gameOver">
-        <h2>💀 游戏结束</h2>
-        <div id="finalScore">0</div>
-        <div id="bestScore">最高: 0</div>
+    <div id="gameOverScreen">
+        <h2>游戏结束</h2>
+        <div id="finalScore">得分: 0</div>
         <button id="restartBtn">再来一局</button>
-        
-        <!-- 本地排行榜 -->
-        <div id="leaderboard">
-            <h3>🏆 历史最佳</h3>
-            <ul id="leaderboardList"></ul>
-        </div>
-        
-        <!-- 成就展示 -->
-        <div id="achievementSection">
-            <h3>🎖️ 成就</h3>
-            <div id="achievementList"></div>
-        </div>
     </div>
-
-    <style>
-        /* 排行榜样式 */
-        #leaderboard {
-            margin-top: 30px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px;
-            width: 90%;
-            max-width: 400px;
-            border: 1px solid rgba(255, 255, 255, 0.15);
-        }
-        
-        #leaderboard h3,
-        #achievementSection h3 {
-            color: #ffd700;
-            margin-bottom: 15px;
-            font-size: 18px;
-            text-align: center;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
-        }
-        
-        #achievementSection {
-            margin-top: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 20px;
-            width: 90%;
-            max-width: 600px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        #leaderboardList {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        
-        #leaderboardList li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            margin: 5px 0;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 8px;
-            font-size: 14px;
-            color: #fff;
-            animation: fadeSlideIn 0.5s ease-out forwards;
-            opacity: 0;
-            transform: translateY(-10px);
-        }
-        
-        #leaderboardList li:nth-child(1) { animation-delay: 0.1s; border-left: 4px solid #ffd700; }
-        #leaderboardList li:nth-child(2) { animation-delay: 0.15s; border-left: 4px solid #c0c0c0; }
-        #leaderboardList li:nth-child(3) { animation-delay: 0.2s; border-left: 4px solid #cd7f32; }
-        #leaderboardList li:nth-child(4) { animation-delay: 0.25s; }
-        
-        /* 成就系统样式 */
-        .achievement-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 12px;
-            margin-top: 20px;
-        }
-        
-        .achievement {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            transition: all 0.3s;
-            border: 2px solid transparent;
-        }
-        
-        .achievement.unlocked {
-            background: rgba(255, 215, 0, 0.15);
-            border-color: rgba(255, 215, 0, 0.4);
-        }
-        
-        .achievement.locked {
-            opacity: 0.4;
-            filter: grayscale(1);
-        }
-        
-        .achievement-icon {
-            font-size: 36px;
-            margin-bottom: 8px;
-        }
-        
-        .achievement-title {
-            font-size: 13px;
-            font-weight: bold;
-            color: #fff;
-            margin-bottom: 4px;
-        }
-        
-        .achievement-desc {
-            font-size: 11px;
-            color: #888;
-        }
-        
-        .achievement.unlocked .achievement-desc {
-            color: #aaa;
-        }
-        
-        .achievement-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.95), rgba(255, 140, 0, 0.95));
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            transform: translateX(120%);
-            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 40px rgba(255, 215, 0, 0.4);
-            z-index: 1000;
-        }
-        
-        .achievement-notification.show {
-            transform: translateX(0);
-        }
-        
-        .notif-icon {
-            font-size: 40px;
-        }
-        
-        .notif-text {
-            color: #fff;
-        }
-        
-        .notif-title {
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 2px;
-        }
-        
-        .notif-name {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        
-        .rank-index {
-            font-weight: bold;
-            width: 25px;
-            color: #888;
-        }
-        
-        .rank-score {
-            font-weight: bold;
-            color: #ff6b6b;
-        }
-        
-        .rank-new {
-            background: rgba(255, 107, 107, 0.2) !important;
-            border: 1px solid rgba(255, 107, 107, 0.4);
-        }
-        
-        .rank-new::after {
-            content: 'NEW';
-            font-size: 10px;
-            background: #ff6b6b;
-            color: #fff;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 10px;
-        }
-        
-        @keyframes fadeSlideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
 
     <script>
-        // ===============================
-        // 音效系统 (Web Audio API)
-        // ===============================
-        const AudioSys = {
-            ctx: null,
-            enabled: true,
-            
-            init() {
-                try {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                } catch (e) {
-                    console.warn('Web Audio API not supported');
-                    this.enabled = false;
-                }
-            },
-            
-            play(type) {
-                if (!this.enabled || !this.ctx) return;
-                if (this.ctx.state === 'suspended') this.ctx.resume();
-                
-                switch(type) {
-                    case 'eat':
-                        // 递增式音阶，更上瘾
-                        this.playTone(300 + Math.random() * 100 + Game.player.combo * 20, 0.08, 'sine', 0.2);
-                        break;
-                    case 'combo':
-                        // 连击越高音调越高，更有成就感
-                        const baseFreq = 440 + this.combo * 50;
-                        this.playTone(baseFreq, 0.12, 'sine', 0.25);
-                        if (this.combo >= 5) {
-                            this.playTone(baseFreq * 1.5, 0.08, 'square', 0.15);
-                        }
-                        break;
-                    case 'die':
-                        this.playTone(200, 0.5, 'sawtooth', 0.5);
-                        this.playTone(150, 0.5, 'sawtooth', 0.5);
-                        break;
-                    case 'spawn':
-                        this.playTone(300, 0.05, 'sine');
-                        break;
-                    case 'milestone':
-                        // 里程碑解锁音效
-                        this.playTone(523, 0.1, 'sine', 0.3);
-                        this.playTone(659, 0.1, 'sine', 0.3);
-                        this.playTone(784, 0.15, 'sine', 0.3);
-                        break;
-                    case 'rush':
-                        // 敌潮警告音效
-                        this.playTone(200, 0.15, 'sawtooth', 0.2);
-                        this.playTone(150, 0.15, 'sawtooth', 0.2);
-                        break;
-                }
-            },
-            
-            playTone(freq, duration, type = 'sine', volume = 0.3) {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
-                
-                osc.type = type;
-                osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
-                
-                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
-                
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
-                
-                osc.start();
-                osc.stop(this.ctx.currentTime + duration);
-            }
+        // ========== 游戏核心 ==========
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // 自适应画布
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize);
+        
+        // 游戏状态
+        let gameState = 'start'; // start, playing, gameover
+        let score = 0;
+        let highScore = localStorage.getItem('blockEater_highScore') || 0;
+        
+        // 玩家
+        const player = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            size: 20,
+            baseSize: 20,
+            color: '#ff6b6b',
+            targetX: canvas.width / 2,
+            targetY: canvas.height / 2,
+            speed: 8
         };
         
-        // ===============================
-        // 屏幕震动系统
-        // ===============================
-        const Shake = {
-            intensity: 0,
-            duration: 0,
-            decay: 0.9,
-            
-            trigger(intensity, duration) {
-                this.intensity = intensity;
-                this.duration = duration;
-            },
-            
-            update(dt) {
-                if (this.duration > 0) {
-                    this.duration -= dt;
-                    this.intensity *= this.decay;
-                }
-            },
-            
-            apply() {
-                if (this.duration > 0) {
-                    const x = (Math.random() - 0.5) * this.intensity;
-                    const y = (Math.random() - 0.5) * this.intensity;
-                    return `translate(${x}px, ${y}px)`;
-                }
-                return '';
-            }
-        };
+        // 敌人
+        let enemies = [];
         
-        // ===============================
-        // 游戏核心引擎
-        // ===============================
-        const Game = {
-            canvas: null,
-            ctx: null,
-            width: 0,
-            height: 0,
-            animationId: null,
-            lastTime: 0,
-            
-            // 游戏状态
-            state: 'start', // start, playing, gameover
-            
-            // 玩家
-            player: {
-                x: 0,
-                y: 0,
-                size: 20,
-                baseSize: 20,
-                color: '#ff6b6b',
-                targetX: 0,
-                targetY: 0,
-                speed: 5,
-                score: 0,
-                combo: 0,
-                comboTimer: 0,
-                scaleAnim: 1, // 🚀 Q弹动画：吞噬时的缩放
-                isTouching: false, // 🖱️ 触摸状态
-                visualScale: 1 // 🖱️ 触摸视觉反馈
-            },
-            
-            // 敌对方块
-            enemies: [],
-            spawnTimer: 0,
-            spawnInterval: 500,
-            
-            // 🚀 开场阶段控制
-            startupPhase: false,
-            startupPhaseEnd: 0,
-            
-            // ⏰ 敌潮系统
-            rushTimer: 0,
-            rushInterval: 15000,
-            
-            // 🎯 里程碑系统
-            unlockedMilestones: [],
-            
-            // 粒子效果
-            particles: [],
-            
-            // 分数动画
-            scorePopups: [],
-            
-            // 最高分
-            highScore: 0,
-            
-            // 配置
-            config: {
-                minEnemySize: 8,
-                maxEnemySize: 60,
-                enemySpeed: 2,
-                comboTimeout: 1500,
-                growthRate: 0.5,
-                maxEnemies: 50
-            },
-            
-            // 初始化
-            init() {
-                this.canvas = document.getElementById('gameCanvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
-                
-                // 初始化音效
-                AudioSys.init();
-                
-                // 输入处理
-                this.setupInput();
-                
-                // 加载最高分
-                const saved = localStorage.getItem('blockEater_highScore');
-                if (saved) this.highScore = parseInt(saved);
-                
-                // 启动渲染循环
-                this.loop(0);
-            },
-            
-            resize() {
-                this.width = window.innerWidth;
-                this.height = window.innerHeight;
-                this.canvas.width = this.width;
-                this.canvas.height = this.height;
-            },
-            
-            setupInput() {
-                // 鼠标/触摸跟随
-                const updateTarget = (e) => {
-                    const rect = this.canvas.getBoundingClientRect();
-                    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                    this.player.targetX = clientX - rect.left;
-                    this.player.targetY = clientY - rect.top;
-                };
-                
-                // 鼠标事件
-                this.canvas.addEventListener('mousemove', updateTarget);
-                
-                // 🖱️ 触摸事件 - 即时响应
-                this.canvas.addEventListener('touchstart', (e) => {
-                    e.preventDefault();
-                    updateTarget(e);
-                    this.player.isTouching = true;
-                }, { passive: false });
-                
-                this.canvas.addEventListener('touchmove', (e) => {
-                    e.preventDefault();
-                    updateTarget(e);
-                }, { passive: false });
-                
-                this.canvas.addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    this.player.isTouching = false;
+        // 粒子
+        let particles = [];
+        
+        // 分数弹出
+        let scorePopups = [];
+        
+        // 更新高分显示
+        document.getElementById('highScore').textContent = highScore;
+        
+        // 生成敌人
+        function spawnEnemy() {
+            const size = 15 + Math.random() * 40;
+            const isDangerous = size > player.size;
+            enemies.push({
+                x: Math.random() < 0.5 ? -size : canvas.width + size,
+                y: Math.random() * canvas.height,
+                size: size,
+                color: isDangerous ? '#ee5a24' : '#4ade80',
+                speed: 1 + Math.random() * 2,
+                angle: Math.random() * Math.PI * 2
+            });
+        }
+        
+        // 粒子效果
+        function createParticles(x, y, color, count = 10) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: (Math.random() - 0.5) * 10,
+                    size: 3 + Math.random() * 5,
+                    color: color,
+                    life: 1
                 });
-                
-                // 🖱️ 触摸视觉反馈 - 玩家变大/发光
-                const player = this.player;
-                const originalUpdate = this.update.bind(this);
-                this.update = function() {
-                    originalUpdate();
-                    
-                    // 触摸时玩家发光效果
-                    if (player.isTouching && this.state === 'playing') {
-                        // 触摸时尺寸放大 10%
-                        player.visualScale = 1.1;
-                    } else {
-                        player.visualScale = 1.0;
-                    }
-                };
-                
-                // 按钮事件 (支持触摸设备)
-                document.getElementById('startBtn').addEventListener('click', () => {
-                    AudioSys.init();  
-                    Game.start();
-                });
-                document.getElementById('startBtn').addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    AudioSys.init();
-                    Game.start();
-                });
-                
-                document.getElementById('restartBtn').addEventListener('click', () => Game.restart());
-                document.getElementById('restartBtn').addEventListener('touchend', (e) => {
-                    e.preventDefault();
-                    Game.restart();
-                });
-                
-                // 键盘空格重启
-                document.addEventListener('keydown', (e) => {
-                    if (e.code === 'Space' && this.state === 'gameover') {
-                        Game.restart();
-                    }
-                });
-            },
+            }
+        }
+        
+        // 分数弹出
+        function createScorePopup(x, y, value) {
+            scorePopups.push({
+                x: x, y: y,
+                value: value,
+                life: 1,
+                vy: -2
+            });
+        }
+        
+        // 游戏循环
+        let lastTime = 0;
+        let spawnTimer = 0;
+        
+        function gameLoop(timestamp) {
+            const deltaTime = timestamp - lastTime;
+            lastTime = timestamp;
             
-            start() {
-                this.state = 'playing';
-                document.getElementById('startScreen').style.display = 'none';
-                document.getElementById('hud').style.display = 'flex';
-                document.getElementById('comboContainer').classList.add('active');
-                
-                // 重置玩家
-                this.player.x = this.width / 2;
-                this.player.y = this.height / 2;
-                this.player.targetX = this.player.x;
-                this.player.targetY = this.player.y;
-                this.player.size = this.player.baseSize;
-                this.player.score = 0;
-                this.player.combo = 0;
-                this.player.comboTimer = 0;
-                
-                // 重置连击条
-                this.updateComboBar();
-                
-                // 清空敌人
-                this.enemies = [];
-                this.particles = [];
-                this.scorePopups = [];
-                
-                // 🚀 高密度开场：前5秒强制生成可吞噬方块
-                this.startupPhase = true;
-                this.startupPhaseEnd = Date.now() + 5000;
-                
-                // 初始生成20个敌人（密度提升）
-                for (let i = 0; i < 20; i++) {
-                    this.spawnEnemy(true); // true = 只生成可吞噬的
-                }
-                
-                // 重置里程碑
-                this.resetMilestones();
-                
-                // 重置敌潮计时器（每15秒一次）
-                this.rushTimer = 0;
-                this.rushInterval = 15000;
-                
-                // 重置进度条
-                this.updateProgressBar();
-            },
+            // 清空画布
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 重置里程碑
-            resetMilestones() {
-                const milestones = document.querySelectorAll('.milestone');
-                milestones.forEach(m => {
-                    m.classList.remove('unlocked');
-                });
-                this.unlockedMilestones = [];
-            },
+            // 绘制渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            gradient.addColorStop(0, '#1a1a2e');
+            gradient.addColorStop(1, '#16213e');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 检查里程碑
-            checkMilestones() {
-                const thresholds = [30, 50, 80, 120];
-                thresholds.forEach((threshold, index) => {
-                    if (this.player.size >= threshold && !this.unlockedMilestones.includes(index)) {
-                        this.unlockedMilestones.push(index);
-                        
-                        // 播放音效和视觉反馈
-                        AudioSys.play('milestone');
-                        
-                        // 解锁视觉
-                        const milestoneEl = document.querySelector(`.milestone[data-milestone="${threshold}"]`);
-                        if (milestoneEl) {
-                            milestoneEl.classList.add('unlocked');
-                        }
-                        
-                        // 大连击特效
-                        const titles = ['新手', '老手', '专家', '传说'];
-                        this.triggerMilestoneEffect(titles[index]);
-                    }
-                });
-            },
-            
-            // 里程碑特效
-            triggerMilestoneEffect(title) {
-                const blast = document.getElementById('comboBlast');
-                blast.textContent = `${title}!`;
-                blast.classList.remove('active');
-                void blast.offsetWidth;
-                blast.classList.add('active');
-                
-                // 闪光
-                const flash = document.getElementById('comboFlash');
-                flash.classList.remove('active');
-                void flash.offsetWidth;
-                flash.classList.add('active');
-                
-                // 震动
-                Shake.trigger(15, 200);
-            },
-            
-            // 🎖️ 实时检查成就解锁
-            checkAchievements() {
-                const newlyUnlocked = AchievementSys.checkAndUnlock();
-                newlyUnlocked.forEach(ach => {
-                    AchievementSys.showNotification(ach);
-                    // 成就解锁时轻微震动反馈
-                    Shake.trigger(8, 150);
-                });
-            },
-            
-            // 敌潮警告
-            triggerRushWarning() {
-                const warning = document.getElementById('rushWarning');
-                warning.classList.add('active');
-                AudioSys.play('rush');
-                
-                setTimeout(() => {
-                    warning.classList.remove('active');
-                }, 1500);
-            },
-            
-            // 生成敌潮
-            spawnRush() {
-                // 一次性生成10个敌人
-                for (let i = 0; i < 10; i++) {
-                    setTimeout(() => {
-                        this.spawnEnemy(Math.random() < 0.3); // 30%可吞噬
-                    }, i * 100);
-                }
-                
-                this.triggerRushWarning();
-            },
-            
-            // 更新进度条
-            updateProgressBar() {
-                // 假设size 150是满级
-                const progress = Math.min(100, (this.player.size / 150) * 100);
-                document.getElementById('progressFill').style.width = `${progress}%`;
-            },
-            
-            restart() {
-                document.getElementById('gameOver').classList.remove('show');
-                {
-                    AudioSys.init();
-                    Game.start();
-                }
-            },
-            
-            // 核心循环
-            loop(timestamp) {
-                const deltaTime = timestamp - this.lastTime;
-                this.lastTime = timestamp;
-                
-                if (this.state === 'playing') {
-                    this.update(deltaTime);
-                }
-                
-                this.render();
-                this.animationId = requestAnimationFrame((t) => this.loop(t));
-            },
-            
-            // 更新逻辑
-            update(dt) {
-                // 玩家移动 - 平滑跟随
-                const dx = this.player.targetX - this.player.x;
-                const dy = this.player.targetY - this.player.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                
-                if (dist > 1) {
-                    const speed = Math.min(this.player.speed, dist * 0.15);
-                    this.player.x += (dx / dist) * speed;
-                    this.player.y += (dy / dist) * speed;
-                }
-                
-                // 边界限制
-                this.player.x = Math.max(this.player.size/2, Math.min(this.width - this.player.size/2, this.player.x));
-                this.player.y = Math.max(this.player.size/2, Math.min(this.height - this.player.size/2, this.player.y));
-                
-                // 连击计时与UI更新
-                if (this.player.comboTimer > 0) {
-                    this.player.comboTimer -= dt;
-                    this.updateComboUI();
-                    if (this.player.comboTimer <= 0) {
-                        this.player.combo = 0;
-                        this.updateComboUI();
-                    }
-                }
-                
+            if (gameState === 'playing') {
                 // 生成敌人
-                this.spawnTimer += dt;
-                if (this.spawnTimer >= this.spawnInterval && this.enemies.length < this.config.maxEnemies) {
-                    this.spawnEnemy();
-                    this.spawnTimer = 0;
-                    // 逐渐增加难度
-                    this.spawnInterval = Math.max(200, this.spawnInterval - 5);
+                spawnTimer += deltaTime;
+                if (spawnTimer > 500) {
+                    spawnEnemy();
+                    spawnTimer = 0;
                 }
+                
+                // 玩家移动 (平滑插值)
+                player.x += (player.targetX - player.x) * 0.15;
+                player.y += (player.targetY - player.y) * 0.15;
+                
+                // 边界检查
+                player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+                player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
                 
                 // 更新敌人
-                this.updateEnemies();
-                
-                // 更新粒子
-                this.updateParticles();
-                
-                // 更新震动
-                Shake.update(dt);
-                
-                // 更新分数动画
-                this.updateScorePopups();
-                
-                // 更新分数显示
-                document.getElementById('score').textContent = this.player.score;
-                
-                // 🚀 检查开场阶段结束
-                if (this.startupPhase && Date.now() > this.startupPhaseEnd) {
-                    this.startupPhase = false;
-                }
-                
-                // ⏰ 敌潮计时器
-                this.rushTimer += dt;
-                if (this.rushTimer >= this.rushInterval) {
-                    this.rushTimer = 0;
-                    this.spawnRush();
-                }
-                
-                // 🎯 检查里程碑
-                this.checkMilestones();
-                
-                // 🎖️ 检查成就解锁（实时）
-                this.checkAchievements();
-                
-                // 📊 更新进度条
-                this.updateProgressBar();
-                
-                // 更新连击条 UI
-                this.updateComboUI();
-            },
-            
-            spawnEnemy(onlyEdible = false) {
-                // 特殊方块配置
-                const specialTypes = [
-                    { type: 'speed', color: '#00ffff', chance: 0.05, icon: '⚡' },    // 加速
-                    { type: 'slow', color: '#4d94ff', chance: 0.05, icon: '❄️' },     // 减速
-                    { type: 'double', color: '#ffd700', chance: 0.05, icon: '⭐' },   // 双倍分
-                    { type: 'ghost', color: '#9b59b6', chance: 0.03, icon: '👻' }     // 幽灵(无敌)
-                ];
-                
-                // 🚀 开场阶段：只生成比玩家小的可吞噬方块
-                let size;
-                if (this.startupPhase) {
-                    size = Math.random() * (this.player.size - 5) + 5;
-                } else if (onlyEdible) {
-                    size = Math.random() * (this.player.size - 8) + 8;
-                } else {
-                    size = Math.random() * (this.config.maxEnemySize - this.config.minEnemySize) + this.config.minEnemySize;
-                }
-                
-                let x, y;
-                
-                // 从边缘生成
-                if (Math.random() < 0.5) {
-                    x = Math.random() < 0.5 ? -size : this.width + size;
-                    y = Math.random() * this.height;
-                } else {
-                    x = Math.random() * this.width;
-                    y = Math.random() < 0.5 ? -size : this.height + size;
-                }
-                
-                // 目标方向（向屏幕中心）
-                const angle = Math.atan2(this.height/2 - y, this.width/2 - x) + (Math.random() - 0.5) * 1.5;
-                const speed = this.config.enemySpeed + Math.random() * 2;
-                
-                // 颜色基于大小
-                const hue = 30 + (size / this.config.maxEnemySize) * 60; // 橙到黄
-                
-                // 检查是否生成特殊方块
-                let special = null;
-                for (const st of specialTypes) {
-                    if (Math.random() < st.chance) {
-                        special = st;
-                        break;
-                    }
-                }
-                
-                this.enemies.push({
-                    x, y, size,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    color: special ? special.color : `hsl(${hue}, 80%, 55%)`,
-                    rotation: Math.random() * Math.PI * 2,
-                    rotationSpeed: (Math.random() - 0.5) * 0.1,
-                    special: special ? special.type : null,
-                    specialIcon: special ? special.icon : null,
-                    pulsePhase: 0
-                });
-                
-                // 音效
-                AudioSys.play('spawn');
-            },
-            
-            updateEnemies() {
-                for (let i = this.enemies.length - 1; i >= 0; i--) {
-                    const enemy = this.enemies[i];
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    const enemy = enemies[i];
                     
-                    // 移动
-                    enemy.x += enemy.vx;
-                    enemy.y += enemy.vy;
-                    enemy.rotation += enemy.rotationSpeed;
+                    // 朝玩家移动
+                    const dx = player.x - enemy.x;
+                    const dy = player.y - enemy.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
                     
-                    // 特殊方块脉动动画
-                    if (enemy.special) {
-                        enemy.pulsePhase += 0.1;
-                    }
-                    
-                    // 边界移除
-                    const margin = enemy.size * 2;
-                    if (enemy.x < -margin || enemy.x > this.width + margin ||
-                        enemy.y < -margin || enemy.y > this.height + margin) {
-                        this.enemies.splice(i, 1);
-                        continue;
+                    if (dist > 0) {
+                        enemy.x += (dx / dist) * enemy.speed;
+                        enemy.y += (dy / dist) * enemy.speed;
                     }
                     
                     // 碰撞检测
-                    const dx = this.player.x - enemy.x;
-                    const dy = this.player.y - enemy.y;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    const minDist = (this.player.size / 2 + enemy.size / 2);
-                    
-                    if (dist < minDist) {
-                        // 特殊方块处理
-                        if (enemy.special === 'ghost') {
-                            // 幽灵方块：直接穿过，免疫
-                            continue;
-                        }
-                        
-                        if (this.player.size > enemy.size) {
-                            // 吞噬成功！
-                            this.eatEnemy(enemy, i);
-                        } else if (enemy.size > this.player.size) {
-                            // 死亡！
-                            this.gameOver();
+                    const collisionDist = player.size + enemy.size;
+                    if (dist < collisionDist) {
+                        if (player.size >= enemy.size) {
+                            // 吃掉！
+                            score += Math.floor(enemy.size);
+                            player.size += enemy.size * 0.1;
+                            createParticles(enemy.x, enemy.y, enemy.color);
+                            createScorePopup(enemy.x, enemy.y, '+' + Math.floor(enemy.size));
+                            enemies.splice(i, 1);
+                        } else {
+                            // 游戏结束！
+                            gameOver();
                             return;
                         }
                     }
-                }
-            },
-            
-            eatEnemy(enemy, index) {
-                // 移除敌人
-                this.enemies.splice(index, 1);
-                
-                // 连击系统
-                this.player.combo++;
-                this.player.comboTimer = this.config.comboTimeout;
-                
-                // 🚀 Q弹吞噬动画：玩家缩放
-                this.player.scaleAnim = 1.3;
-                
-                // 更新连击条 UI
-                this.updateComboUI();
-                
-                // 分数计算
-                let basePoints = Math.floor(enemy.size);
-                let comboBonus = Math.floor(basePoints * (this.player.combo * 0.5));
-                let points = basePoints + comboBonus;
-                
-                // 特殊效果处理
-                let effectText = '';
-                if (enemy.special === 'speed') {
-                    // 加速效果
-                    this.player.speed += 3;
-                    effectText = '⚡ SPEED!';
-                } else if (enemy.special === 'slow') {
-                    // 减速周围敌人
-                    this.slowAllEnemies(0.3);
-                    effectText = '❄️ SLOW!';
-                } else if (enemy.special === 'double') {
-                    // 双倍分数
-                    points *= 2;
-                    effectText = '⭐ x2!';
-                } else if (enemy.special === 'ghost') {
-                    // 幽灵不可吞噬
-                    return;
-                }
-                
-                this.player.score += points;
-                
-                // 触发特效
-                this.createParticles(enemy.x, enemy.y, enemy.color, 20);
-                this.createScorePopup(enemy.x, enemy.y, points, this.player.combo, effectText);
-                this.showCombo(this.player.combo);
-                
-                // 音效反馈
-                if (enemy.special) {
-                    AudioSys.play('combo');
-                    Shake.trigger(15, 150);
-                } else if (this.player.combo >= 5) {
-                    AudioSys.play('combo');
-                    Shake.trigger(10, 100);
-                } else {
-                    AudioSys.play('eat');
-                }
-                
-                // 成长
-                this.player.size += this.config.growthRate;
-                this.player.speed = Math.max(3, 5 - (this.player.size - this.player.baseSize) * 0.02);
-            },
-            
-            slowAllEnemies(factor) {
-                for (const enemy of this.enemies) {
-                    enemy.vx *= factor;
-                    enemy.vy *= factor;
-                }
-            },
-            
-            gameOver() {
-                this.state = 'gameover';
-                
-                // 死亡音效
-                AudioSys.play('die');
-                Shake.trigger(20, 300);
-                
-                // 爆炸特效
-                this.createParticles(this.player.x, this.player.y, this.player.color, 50);
-                
-                // 更新最高分
-                if (this.player.score > this.highScore) {
-                    this.highScore = this.player.score;
-                    localStorage.setItem('blockEater_highScore', this.highScore);
-                }
-                
-                // 显示结束界面
-                setTimeout(() => {
-                    document.getElementById('gameOver').classList.add('show');
-                    document.getElementById('finalScore').textContent = this.player.score;
-                    document.getElementById('bestScore').textContent = `最高: ${this.highScore}`;
-                    document.getElementById('hud').style.display = 'none';
-                    document.getElementById('comboContainer').classList.remove('active');
-                }, 500);
-            },
-            
-            createParticles(x, y, color, count) {
-                for (let i = 0; i < count; i++) {
-                    const angle = (Math.PI * 2 / count) * i + Math.random() * 0.5;
-                    const speed = 2 + Math.random() * 5;
-                    this.particles.push({
-                        x, y,
-                        vx: Math.cos(angle) * speed,
-                        vy: Math.sin(angle) * speed,
-                        size: 3 + Math.random() * 5,
-                        color,
-                        life: 1
-                    });
-                }
-            },
-            
-            updateParticles() {
-                for (let i = this.particles.length - 1; i >= 0; i--) {
-                    const p = this.particles[i];
-                    p.x += p.vx;
-                    p.y += p.vy;
-                    p.vx *= 0.95;
-                    p.vy *= 0.95;
-                    p.life -= 0.02;
-                    p.size *= 0.98;
                     
-                    if (p.life <= 0) {
-                        this.particles.splice(i, 1);
-                    }
+                    // 绘制敌人
+                    ctx.beginPath();
+                    ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
+                    ctx.fillStyle = enemy.color;
+                    ctx.fill();
+                    ctx.shadowBlur = 10;
+                    ctx.shadowColor = enemy.color;
                 }
-            },
-            
-            createScorePopup(x, y, points, combo, effectText = '') {
-                this.scorePopups.push({
-                    x, y,
-                    points,
-                    combo,
-                    effectText,
-                    life: 1,
-                    vy: -2
-                });
-            },
-            
-            updateScorePopups() {
-                for (let i = this.scorePopups.length - 1; i >= 0; i--) {
-                    const s = this.scorePopups[i];
-                    s.y += s.vy;
-                    s.life -= 0.015;
-                    if (s.life <= 0) {
-                        this.scorePopups.splice(i, 1);
-                    }
-                }
-            },
-            
-            showCombo(combo) {
-                if (combo < 2) return;
-                
-                const display = document.getElementById('comboDisplay');
-                display.textContent = `${combo}x 连击!`;
-                display.style.opacity = '1';
-                display.style.transform = 'translate(-50%, -50%) scale(1.2)';
-                
-                setTimeout(() => {
-                    display.style.opacity = '0';
-                    display.style.transform = 'translate(-50%, -50%) scale(1)';
-                }, 500);
-                
-                // 大连击特效 (10+ 连击)
-                if (combo >= 10) {
-                    this.triggerBigComboEffect(combo);
-                }
-            },
-            
-            // 大连击特效系统
-            triggerBigComboEffect(combo) {
-                const blast = document.getElementById('comboBlast');
-                const flash = document.getElementById('comboFlash');
-                
-                // 根据连击数显示不同文字
-                let blastText = 'AMAZING!';
-                if (combo >= 20) blastText = 'LEGENDARY!';
-                else if (combo >= 15) blastText = 'INSANE!';
-                else if (combo >= 10) blastText = 'AWESOME!';
-                
-                // 冲击波文字
-                blast.textContent = blastText;
-                blast.classList.remove('active');
-                void blast.offsetWidth; // 强制重绘
-                blast.classList.add('active');
-                
-                // 闪光效果
-                flash.classList.remove('active');
-                void flash.offsetWidth;
-                flash.classList.add('active');
-                
-                // 背景脉动
-                document.body.classList.add('bgPulse');
-                setTimeout(() => document.body.classList.remove('bgPulse'), 600);
-                
-                // 强烈震动
-                Shake.trigger(20, 200);
-                
-                // 特殊音效
-                if (combo >= 10) {
-                    AudioSys.playTone(880, 0.1, 'square', 0.2);
-                    AudioSys.playTone(1100, 0.1, 'square', 0.2);
-                    AudioSys.playTone(1320, 0.2, 'sawtooth', 0.15);
-                }
-            },
-            
-            // 更新连击条 UI
-            updateComboUI() {
-                const container = document.getElementById('comboContainer');
-                const label = document.getElementById('comboLabel');
-                const fill = document.getElementById('comboBarFill');
-                
-                if (this.player.combo > 1) {
-                    container.classList.add('active');
-                    label.textContent = `${this.player.combo}x COMBO!`;
-                    
-                    // 计算进度条百分比
-                    const percentage = (this.player.comboTimer / this.config.comboTimeout) * 100;
-                    fill.style.width = `${percentage}%`;
-                    
-                    // 颜色根据连击数变化
-                    if (this.player.combo >= 10) {
-                        fill.style.background = 'linear-gradient(90deg, #ff0000, #ff00ff)'; // 红色 -> 紫色
-                        container.style.borderColor = 'rgba(255, 0, 255, 0.5)';
-                        label.style.color = '#ff00ff';
-                    } else if (this.player.combo >= 5) {
-                        fill.style.background = 'linear-gradient(90deg, #ffd93d, #ff6b6b)'; // 黄色 -> 红色
-                        container.style.borderColor = 'rgba(255, 217, 61, 0.5)';
-                        label.style.color = '#ffd93d';
-                    } else {
-                        fill.style.background = 'linear-gradient(90deg, #ffd93d, #6c5ce7)'; // 黄色 -> 紫色
-                        container.style.borderColor = 'rgba(255, 217, 61, 0.3)';
-                        label.style.color = '#ffd93d';
-                    }
-                } else {
-                    container.classList.remove('active');
-                }
-            },
-            
-            // 渲染
-            render() {
-                // 清屏
-                this.ctx.fillStyle = '#1a1a2e';
-                this.ctx.fillRect(0, 0, this.width, this.height);
-                
-                // 应用屏幕震动
-                const shakeOffset = Shake.apply();
-                if (shakeOffset) {
-                    this.ctx.save();
-                    const match = shakeOffset.match(/translate\(([^,]+)px, ([^)]+)px\)/);
-                    if (match) {
-                        this.ctx.translate(parseFloat(match[1]), parseFloat(match[2]));
-                    }
-                }
-                
-                // 绘制网格背景
-                this.drawGrid();
-                
-                // 绘制敌人
-                for (const enemy of this.enemies) {
-                    if (enemy.special) {
-                        this.drawSpecialBlock(enemy);
-                    } else {
-                        this.drawBlock(enemy.x, enemy.y, enemy.size, enemy.color, enemy.rotation);
-                    }
-                }
-                
-                // 绘制粒子
-                for (const p of this.particles) {
-                    this.ctx.globalAlpha = p.life;
-                    this.ctx.fillStyle = p.color;
-                    this.ctx.beginPath();
-                    this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                    this.ctx.fill();
-                }
-                this.ctx.globalAlpha = 1;
                 
                 // 绘制玩家
-                if (this.state !== 'gameover') {
-                    // 🚀 Q弹动画：计算缩放
-                    if (this.player.scaleAnim > 1) {
-                        this.player.scaleAnim -= 0.05;
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+                ctx.fillStyle = player.color;
+                ctx.fill();
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = player.color;
+                ctx.shadowBlur = 0;
+                
+                // 更新粒子
+                for (let i = particles.length - 1; i >= 0; i--) {
+                    const p = particles[i];
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.02;
+                    if (p.life <= 0) {
+                        particles.splice(i, 1);
+                        continue;
                     }
-                    // 🖱️ 触摸反馈：叠加 visualScale
-                    const touchScale = this.player.visualScale || 1;
-                    const scale = (this.player.scaleAnim || 1) * touchScale;
-                    
-                    this.ctx.save();
-                    this.ctx.translate(this.player.x, this.player.y);
-                    this.ctx.scale(scale, scale);
-                    this.drawPlayerGlow();
-                    this.drawBlock(0, 0, this.player.size, this.player.color, 0);
-                    this.drawPlayerEyes();
-                    this.ctx.restore();
+                    ctx.globalAlpha = p.life;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
                 }
+                ctx.globalAlpha = 1;
                 
-                // 绘制分数动画
-                for (const s of this.scorePopups) {
-                    this.ctx.globalAlpha = s.life;
-                    this.ctx.font = `bold ${16 + s.combo * 2}px sans-serif`;
-                    this.ctx.fillStyle = '#fff';
-                    this.ctx.textAlign = 'center';
-                    this.ctx.fillText(`+${s.points}`, s.x, s.y - 20);
-                    if (s.effectText) {
-                        this.ctx.font = `bold 14px sans-serif`;
-                        this.ctx.fillStyle = '#ffd700';
-                        this.ctx.fillText(s.effectText, s.x, s.y);
+                // 更新分数弹出
+                for (let i = scorePopups.length - 1; i >= 0; i--) {
+                    const s = scorePopups[i];
+                    s.y += s.vy;
+                    s.life -= 0.02;
+                    if (s.life <= 0) {
+                        scorePopups.splice(i, 1);
+                        continue;
                     }
+                    ctx.globalAlpha = s.life;
+                    ctx.font = 'bold 24px sans-serif';
+                    ctx.fillStyle = '#fff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(s.value, s.x, s.y);
                 }
-                this.ctx.globalAlpha = 1;
+                ctx.globalAlpha = 1;
                 
-                // 恢复震动偏移
-                if (shakeOffset) {
-                    this.ctx.restore();
-                }
-            },
-            
-            drawGrid() {
-                this.ctx.strokeStyle = 'rgba(255, 255, 255, 0.03)';
-                this.ctx.lineWidth = 1;
-                const gridSize = 50;
-                
-                for (let x = 0; x < this.width; x += gridSize) {
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(x, 0);
-                    this.ctx.lineTo(x, this.height);
-                    this.ctx.stroke();
-                }
-                for (let y = 0; y < this.height; y += gridSize) {
-                    this.ctx.beginPath();
-                    this.ctx.moveTo(0, y);
-                    this.ctx.lineTo(this.width, y);
-                    this.ctx.stroke();
-                }
-            },
-            
-            drawBlock(x, y, size, color, rotation) {
-                this.ctx.save();
-                this.ctx.translate(x, y);
-                this.ctx.rotate(rotation);
-                
-                // 主体
-                this.ctx.fillStyle = color;
-                this.ctx.fillRect(-size/2, -size/2, size, size);
-                
-                // 高光
-                this.ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-                this.ctx.fillRect(-size/2, -size/2, size, size * 0.35);
-                
-                // 阴影
-                this.ctx.fillStyle = 'rgba(0, 0, 0, 0.25)';
-                this.ctx.fillRect(-size/2, size/2 - size * 0.35, size, size * 0.35);
-                
-                this.ctx.restore();
-            },
-            
-            drawSpecialBlock(enemy) {
-                const { x, y, size, color, specialIcon, pulsePhase } = enemy;
-                
-                this.ctx.save();
-                this.ctx.translate(x, y);
-                
-                // 发光效果
-                const glow = this.ctx.createRadialGradient(0, 0, 0, 0, 0, size * 1.2);
-                glow.addColorStop(0, color);
-                glow.addColorStop(0.6, color + '80');
-                glow.addColorStop(1, 'transparent');
-                this.ctx.fillStyle = glow;
-                this.ctx.beginPath();
-                this.ctx.arc(0, 0, size * 1.2, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // 脉动效果
-                const scale = 1 + Math.sin(pulsePhase) * 0.08;
-                this.ctx.scale(scale, scale);
-                
-                // 主体
-                this.ctx.fillStyle = color;
-                this.ctx.fillRect(-size/2, -size/2, size, size);
-                
-                // 图标
-                this.ctx.font = `${size * 0.6}px sans-serif`;
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText(specialIcon, 0, 1);
-                
-                this.ctx.restore();
-            },
-            
-            drawPlayerGlow() {
-                const gradient = this.ctx.createRadialGradient(
-                    this.player.x, this.player.y, 0,
-                    this.player.x, this.player.y, this.player.size * 1.5
-                );
-                gradient.addColorStop(0, 'rgba(255, 107, 107, 0.3)');
-                gradient.addColorStop(1, 'rgba(255, 107, 107, 0)');
-                
-                this.ctx.fillStyle = gradient;
-                this.ctx.beginPath();
-                this.ctx.arc(this.player.x, this.player.y, this.player.size * 1.5, 0, Math.PI * 2);
-                this.ctx.fill();
-            },
-            
-            drawPlayerEyes() {
-                const eyeOffset = this.player.size * 0.2;
-                const eyeSize = this.player.size * 0.15;
-                
-                this.ctx.fillStyle = '#fff';
-                this.ctx.beginPath();
-                this.ctx.arc(this.player.x - eyeOffset, this.player.y - eyeOffset * 0.5, eyeSize, 0, Math.PI * 2);
-                this.ctx.arc(this.player.x + eyeOffset, this.player.y - eyeOffset * 0.5, eyeSize, 0, Math.PI * 2);
-                this.ctx.fill();
-                
-                // 瞳孔跟随目标方向
-                const dx = this.player.targetX - this.player.x;
-                const dy = this.player.targetY - this.player.y;
-                const angle = Math.atan2(dy, dx);
-                const pupilOffset = eyeSize * 0.3;
-                
-                this.ctx.fillStyle = '#333';
-                this.ctx.beginPath();
-                this.ctx.arc(
-                    this.player.x - eyeOffset + Math.cos(angle) * pupilOffset,
-                    this.player.y - eyeOffset * 0.5 + Math.sin(angle) * pupilOffset,
-                    eyeSize * 0.5, 0, Math.PI * 2
-                );
-                this.ctx.arc(
-                    this.player.x + eyeOffset + Math.cos(angle) * pupilOffset,
-                    this.player.y - eyeOffset * 0.5 + Math.sin(angle) * pupilOffset,
-                    eyeSize * 0.5, 0, Math.PI * 2
-                );
-                this.ctx.fill();
-            }
-        };
-        
-        // 启动游戏
-        Game.init();
-        
-        // ===============================
-        // 排行榜系统 (本地持久化)
-        // ===============================
-        const Leaderboard = {
-            storageKey: 'blockEater_scores',
-            maxEntries: 10,
-            
-            getScores() {
-                try {
-                    const data = localStorage.getItem(this.storageKey);
-                    return data ? JSON.parse(data) : [];
-                } catch (e) {
-                    return [];
-                }
-            },
-            
-            addScore(score) {
-                const scores = this.getScores();
-                const date = new Date().toLocaleDateString();
-                scores.push({ score, date });
-                
-                // 排序
-                scores.sort((a, b) => b.score - a.score);
-                
-                // 截断
-                const topScores = scores.slice(0, this.maxEntries);
-                
-                // 保存
-                localStorage.setItem(this.storageKey, JSON.stringify(topScores));
-                
-                // 返回本次是否是新纪录
-                return topScores.findIndex(s => s.score === score && s.date === date) < 3;
-            },
-            
-            render() {
-                const scores = this.getScores();
-                const list = document.getElementById('leaderboardList');
-                list.innerHTML = '';
-                
-                if (scores.length === 0) {
-                    list.innerHTML = '<li style="justify-content:center; color:#888;">暂无记录</li>';
-                    return;
-                }
-                
-                scores.forEach((entry, index) => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span class="rank-index">#${index + 1}</span>
-                        <span class="rank-score">${entry.score}</span>
-                    `;
-                    list.appendChild(li);
-                });
-            },
-            
-            renderWithNew(newScore) {
-                const scores = this.getScores();
-                const list = document.getElementById('leaderboardList');
-                list.innerHTML = '';
-                
-                scores.forEach((entry, index) => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span class="rank-index">#${index + 1}</span>
-                        <span class="rank-score">${entry.score}</span>
-                    `;
-                    
-                    // 如果是新达成的分数
-                    if (entry.score === newScore) {
-                        li.classList.add('rank-new');
-                    }
-                    
-                    list.appendChild(li);
-                });
-            }
-        };
-        
-        // ===============================
-        // 成就系统
-        // ===============================
-        const AchievementSys = {
-            storageKey: 'blockEater_achievements',
-            achievements: [
-                { id: 'first_game', title: '初次登场', desc: '完成第一局游戏', icon: '🎮', condition: () => true },
-                { id: 'score_100', title: '小有所成', desc: '单局得分突破 100', icon: '💯', condition: () => Game.player.score >= 100 },
-                { id: 'score_500', title: '渐入佳境', desc: '单局得分突破 500', icon: '📈', condition: () => Game.player.score >= 500 },
-                { id: 'score_1000', title: '高分玩家', desc: '单局得分突破 1000', icon: '🏅', condition: () => Game.player.score >= 1000 },
-                { id: 'combo_5', title: '连击初体验', desc: '达成 5x 连击', icon: '⚡', condition: () => Game.player.combo >= 5 },
-                { id: 'combo_10', title: '连击达人', desc: '达成 10x 连击', icon: '🔥', condition: () => Game.player.combo >= 10 },
-                { id: 'combo_20', title: '连击大师', desc: '达成 20x 连击', icon: '💥', condition: () => Game.player.combo >= 20 },
-                { id: 'high_score_100', title: '破百纪录', desc: '最高分突破 100', icon: '🌟', condition: () => this.highScore >= 100 },
-                { id: 'high_score_500', title: '排行榜常客', desc: '最高分突破 500', icon: '⭐', condition: () => this.highScore >= 500 },
-                { id: 'high_score_1000', title: '传奇玩家', desc: '最高分突破 1000', icon: '👑', condition: () => this.highScore >= 1000 }
-            ],
-            
-            getUnlocked() {
-                try {
-                    return JSON.parse(localStorage.getItem(this.storageKey) || '[]');
-                } catch {
-                    return [];
-                }
-            },
-            
-            checkAndUnlock() {
-                const unlocked = this.getUnlocked();
-                const newlyUnlocked = [];
-                
-                this.achievements.forEach(ach => {
-                    if (!unlocked.includes(ach.id) && ach.condition()) {
-                        unlocked.push(ach.id);
-                        newlyUnlocked.push(ach);
-                    }
-                });
-                
-                localStorage.setItem(this.storageKey, JSON.stringify(unlocked));
-                return newlyUnlocked;
-            },
-            
-            render(containerId) {
-                const container = document.getElementById(containerId);
-                const unlocked = this.getUnlocked();
-                
-                let html = '<div class="achievement-grid">';
-                
-                this.achievements.forEach(ach => {
-                    const isUnlocked = unlocked.includes(ach.id);
-                    html += `
-                        <div class="achievement ${isUnlocked ? 'unlocked' : 'locked'}" 
-                             data-id="${ach.id}"
-                             title="${ach.desc}">
-                            <div class="achievement-icon">${ach.icon}</div>
-                            <div class="achievement-title">${ach.title}</div>
-                            <div class="achievement-desc">${ach.desc}</div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div>';
-                container.innerHTML = html;
-            },
-            
-            showNotification(achievement) {
-                const notif = document.createElement('div');
-                notif.className = 'achievement-notification';
-                notif.innerHTML = `
-                    <div class="notif-icon">${achievement.icon}</div>
-                    <div class="notif-text">
-                        <div class="notif-title">成就解锁!</div>
-                        <div class="notif-name">${achievement.title}</div>
-                    </div>
-                `;
-                document.body.appendChild(notif);
-                
-                setTimeout(() => notif.classList.add('show'), 10);
-                setTimeout(() => {
-                    notif.classList.remove('show');
-                    setTimeout(() => notif.remove(), 300);
-                }, 3000);
-                
-                // 播放解锁音效
-                AudioSys.play('powerup');
-            }
-        };
-        
-        // 覆盖 Game 的 gameOver 方法以集成排行榜
-        const _originalGameOver = Game.gameOver;
-        Game.gameOver = function() {
-            // 调用原始逻辑（但稍微调整以等待 UI 更新）
-            this.state = 'gameover';
-            
-            // 死亡音效
-            AudioSys.play('die');
-            Shake.trigger(20, 300);
-            
-            // 爆炸特效
-            this.createParticles(this.player.x, this.player.y, this.player.color, 50);
-            
-            // 更新最高分
-            let isNewRecord = false;
-            if (this.player.score > this.highScore) {
-                this.highScore = this.player.score;
-                localStorage.setItem('blockEater_highScore', this.highScore);
-                isNewRecord = true;
+                // 更新分数显示
+                document.getElementById('score').textContent = score;
             }
             
-            // 更新排行榜
-            Leaderboard.addScore(this.player.score);
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // 开始游戏
+        function startGame() {
+            console.log('开始游戏!');
+            gameState = 'playing';
+            score = 0;
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            player.size = player.baseSize;
+            player.targetX = player.x;
+            player.targetY = player.y;
+            enemies = [];
+            particles = [];
+            scorePopups = [];
             
-            // 检查成就
-            const newlyUnlocked = AchievementSys.checkAndUnlock();
-            newlyUnlocked.forEach(ach => {
-                AchievementSys.showNotification(ach);
-            });
-            
-            // 显示结束界面
-            setTimeout(() => {
-                document.getElementById('gameOver').classList.add('show');
-                document.getElementById('finalScore').textContent = this.player.score;
-                document.getElementById('bestScore').textContent = `最高: ${this.highScore}`;
-                document.getElementById('hud').style.display = 'none';
-                document.getElementById('comboContainer').classList.remove('active');
-                
-                // 渲染排行榜
-                Leaderboard.renderWithNew(isNewRecord ? this.player.score : -1);
-                
-                // 渲染成就
-                AchievementSys.render('achievementList');
-            }, 500);
-        };
-    </script>
-    
-    <!-- 每日挑战系统 -->
-    <style>
-        /* 每日挑战样式 */
-        #dailyChallenge {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 15px;
-            border: 1px solid rgba(255, 215, 0, 0.3);
-            min-width: 180px;
-            z-index: 6;
-            display: none; /* 默认隐藏，开始游戏后显示 */
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('gameOverScreen').style.display = 'none';
+            document.getElementById('hud').style.display = 'flex';
         }
         
-        #dailyChallenge.active {
-            display: block;
-            animation: slideIn 0.3s ease-out;
-        }
-        
-        .daily-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 10px;
-        }
-        
-        .daily-icon {
-            font-size: 20px;
-        }
-        
-        .daily-title {
-            color: #ffd700;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .daily-status {
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: auto;
-        }
-        
-        .daily-status.pending {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-        }
-        
-        .daily-status.completed {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4caf50;
-        }
-        
-        .daily-goal {
-            color: #fff;
-            font-size: 13px;
-            margin-bottom: 8px;
-            line-height: 1.4;
-        }
-        
-        .daily-progress {
-            height: 6px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 3px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        
-        .daily-progress-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ffd700, #ff6b6b);
-            border-radius: 3px;
-            transition: width 0.3s ease;
-        }
-        
-        .daily-reward {
-            color: #4caf50;
-            font-size: 11px;
-            margin-bottom: 5px;
-        }
-        
-        .daily-countdown {
-            color: #888;
-            font-size: 10px;
-            text-align: right;
-        }
-        
-        /* 每日挑战完成弹窗 */
-        #dailyCompleteModal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-        }
-        
-        #dailyCompleteModal.show {
-            display: flex;
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        .daily-modal-content {
-            background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.15));
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
-            padding: 40px;
-            text-align: center;
-            border: 2px solid rgba(255, 215, 0, 0.4);
-            max-width: 320px;
-            animation: scaleIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        
-        .daily-modal-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        
-        .daily-modal-title {
-            color: #ffd700;
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .daily-modal-desc {
-            color: #fff;
-            font-size: 16px;
-            margin-bottom: 20px;
-        }
-        
-        .daily-modal-reward {
-            color: #4caf50;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 25px;
-        }
-        
-        .daily-modal-btn {
-            padding: 12px 40px;
-            font-size: 16px;
-            background: linear-gradient(135deg, #ffd700, #ff9500);
-            border: none;
-            border-radius: 30px;
-            color: #000;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        
-        .daily-modal-btn:active {
-            transform: scale(0.95);
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes scaleIn {
-            from { transform: scale(0.8); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-    </style>
-    
-    <!-- 每日挑战弹窗 -->
-    <div id="dailyCompleteModal">
-        <div class="daily-modal-content">
-            <div class="daily-modal-icon">🎉</div>
-            <div class="daily-modal-title">每日挑战完成!</div>
-            <div class="daily-modal-desc" id="dailyModalDesc">你今天的表现太棒了!</div>
-            <div class="daily-modal-reward" id="dailyModalReward">+50 额外分数</div>
-            <button class="daily-modal-btn" onclick="DailyChallenge.closeModal()">继续游戏</button>
-        </div>
-    </div>
-    
-    <script>
-        // ===============================
-        // 每日挑战系统
-        // ===============================
-        const DailyChallenge = {
-            storageKey: 'blockEater_dailyChallenge',
-            
-            // 挑战类型配置
-            challenges: [
-                { type: 'score', icon: '🎯', title: '得分挑战', desc: '单局获得 {target} 分', reward: 50 },
-                { type: 'combo', icon: '🔥', title: '连击挑战', desc: '达成 {target} 连击', reward: 30 },
-                { type: 'eat', icon: '🍽️', title: '吞噬挑战', desc: '吞噬 {target} 个方块', reward: 40 },
-                { type: 'size', icon: '📈', title: '成长挑战', desc: '体型达到 {target}', reward: 60 }
-            ],
-            
-            // 获取今天的挑战数据
-            getTodayData() {
-                const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-                const stored = localStorage.getItem(this.storageKey);
-                let data = stored ? JSON.parse(stored) : {};
-                
-                if (data.date !== today) {
-                    // 新的一天，生成新挑战
-                    const challengeType = this.challenges[Math.floor(Math.random() * this.challenges.length)];
-                    const difficulty = Math.floor(Math.random() * 3) + 1; // 1-3 难度
-                    
-                    let target;
-                    switch(challengeType.type) {
-                        case 'score': target = 100 * difficulty * difficulty; break;
-                        case 'combo': target = 10 * difficulty; break;
-                        case 'eat': target = 20 * difficulty; break;
-                        case 'size': target = 50 + difficulty * 20; break;
-                    }
-                    
-                    data = {
-                        date: today,
-                        type: challengeType.type,
-                        icon: challengeType.icon,
-                        title: challengeType.title,
-                        desc: challengeType.desc,
-                        target: target,
-                        reward: challengeType.reward * difficulty,
-                        progress: 0,
-                        completed: false
-                    };
-                    localStorage.setItem(this.storageKey, JSON.stringify(data));
-                }
-                
-                return data;
-            },
-            
-            // 初始化显示
-            init() {
-                const data = this.getTodayData();
-                const container = document.getElementById('dailyChallenge');
-                const goalEl = document.getElementById('dailyGoal');
-                const progressFill = document.getElementById('dailyProgressFill');
-                const rewardEl = document.getElementById('dailyReward');
-                const countdownEl = document.getElementById('dailyCountdown');
-                const statusEl = document.getElementById('dailyStatus');
-                
-                if (data.completed) {
-                    statusEl.textContent = '已完成';
-                    statusEl.className = 'daily-status completed';
-                } else {
-                    statusEl.textContent = '进行中';
-                    statusEl.className = 'daily-status pending';
-                }
-                
-                goalEl.textContent = data.desc.replace('{target}', data.target);
-                rewardEl.textContent = `🎁 奖励: +${data.reward} 分数`;
-                
-                const progress = Math.min(100, (data.progress / data.target) * 100);
-                progressFill.style.width = `${progress}%`;
-                
-                // 倒计时
-                this.updateCountdown();
-                setInterval(() => this.updateCountdown(), 60000); // 每分钟更新
-                
-                container.classList.add('active');
-            },
-            
-            // 更新倒计时
-            updateCountdown() {
-                const now = new Date();
-                const tomorrow = new Date(now);
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                tomorrow.setHours(0, 0, 0, 0);
-                
-                const diff = tomorrow - now;
-                const hours = Math.floor(diff / (1000 * 60 * 60));
-                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                
-                document.getElementById('dailyCountdown').textContent = 
-                    `刷新: ${hours}小时${minutes}分钟`;
-            },
-            
-            // 更新进度
-            addProgress(value) {
-                const data = this.getTodayData();
-                if (data.completed) return 0;
-                
-                // 累加进度
-                data.progress += value;
-                let bonus = 0;
-                
-                if (data.progress >= data.target) {
-                    data.progress = data.target;
-                    if (!data.completed) {
-                        data.completed = true;
-                        bonus = data.reward;
-                        this.showCompleteModal(data);
-                    }
-                }
-                
-                localStorage.setItem(this.storageKey, JSON.stringify(data));
-                
-                // 更新 UI
-                const progressFill = document.getElementById('dailyProgressFill');
-                const progress = Math.min(100, (data.progress / data.target) * 100);
-                progressFill.style.width = `${progress}%`;
-                
-                if (data.completed) {
-                    document.getElementById('dailyStatus').textContent = '已完成';
-                    document.getElementById('dailyStatus').className = 'daily-status completed';
-                }
-            },
-            
-            // 进度增加（用于游戏过程中）
-            addProgress(value) {
-                const data = this.getTodayData();
-                if (data.completed) return 0;
-                
-                data.progress += value;
-                let bonus = 0;
-                
-                if (data.progress >= data.target) {
-                    data.progress = data.target;
-                    data.completed = true;
-                    bonus = data.reward;
-                    this.showCompleteModal(data);
-                }
-                
-                localStorage.setItem(this.storageKey, JSON.stringify(data));
-                
-                // 更新 UI
-                const progressFill = document.getElementById('dailyProgressFill');
-                const progress = Math.min(100, (data.progress / data.target) * 100);
-                progressFill.style.width = `${progress}%`;
-                
-                if (data.completed) {
-                    document.getElementById('dailyStatus').textContent = '已完成';
-                    document.getElementById('dailyStatus').className = 'daily-status completed';
-                }
-                
-                return bonus;
-            },
-            
-            // 显示完成弹窗
-            showCompleteModal(data) {
-                const modal = document.getElementById('dailyCompleteModal');
-                document.getElementById('dailyModalDesc').textContent = 
-                    `恭喜完成「${data.title}」!`;
-                document.getElementById('dailyModalReward').textContent = 
-                    `+${data.reward} 额外分数已入账!`;
-                modal.classList.add('show');
-                
-                // 播放音效
-                AudioSys.play('powerup');
-            },
-            
-            // 关闭弹窗
-            closeModal() {
-                document.getElementById('dailyCompleteModal').classList.remove('show');
-            },
-            
-            // 获取奖励
-            getReward() {
-                const data = this.getTodayData();
-                return data.completed ? data.reward : 0;
-            },
-            
-            // 在游戏结束时应用奖励
-            applyReward() {
-                const reward = this.getReward();
-                if (reward > 0) {
-                    // 将奖励添加到玩家分数（仅用于展示）
-                    // 实际奖励在游戏过程中已经记录
-                }
-                return reward;
+        // 游戏结束
+        function gameOver() {
+            gameState = 'gameover';
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('blockEater_highScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
             }
-        };
+            document.getElementById('finalScore').textContent = '得分: ' + score;
+            document.getElementById('gameOverScreen').style.display = 'flex';
+            document.getElementById('hud').style.display = 'none';
+        }
         
-        // 在游戏开始时初始化每日挑战
-        const _originalStart = Game.start;
-        Game.start = function() {
-            _originalStart.call(this);
-            DailyChallenge.init();
-        };
-        
-        // 在吞噬时更新每日挑战进度
-        const _originalEat = Game.eatEnemy;
-        Game.eatEnemy = function(enemy, index) {
-            const data = DailyChallenge.getTodayData();
-            
-            // 根据挑战类型更新进度
-            if (data.type === 'eat') {
-                DailyChallenge.addProgress(1);
-            } else if (data.type === 'size') {
-                DailyChallenge.addProgress(Math.floor(this.player.size));
+        // 鼠标/触摸控制
+        canvas.addEventListener('mousemove', (e) => {
+            if (gameState === 'playing') {
+                player.targetX = e.clientX;
+                player.targetY = e.clientY;
             }
-            
-            _originalEat.call(this, enemy, index);
-        };
+        });
         
-        // 在得分时更新每日挑战进度
-        const _originalUpdateCombo = Game.updateComboUI;
-        Game.updateComboUI = function() {
-            _originalUpdateCombo.call(this);
-            
-            const data = DailyChallenge.getTodayData();
-            if (data.type === 'score') {
-                DailyChallenge.addProgress(this.player.score);
-            } else if (data.type === 'combo') {
-                DailyChallenge.addProgress(this.player.combo);
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (gameState === 'playing') {
+                player.targetX = e.touches[0].clientX;
+                player.targetY = e.touches[0].clientY;
             }
-        };
+        }, { passive: false });
+        
+        // 按钮事件
+        document.getElementById('startBtn').addEventListener('click', startGame);
+        document.getElementById('restartBtn').addEventListener('click', startGame);
+        
+        // 启动游戏循环
+        requestAnimationFrame(gameLoop);
     </script>
 </body>
 </html>
