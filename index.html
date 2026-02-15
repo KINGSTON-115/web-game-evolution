@@ -2,108 +2,48 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>方块吞噬者 - 修复版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方块吞噬者</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            background: #1a1a2e; 
-            overflow: hidden; 
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            touch-action: none;
-        }
-        #gameCanvas { 
-            display: block; 
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); 
-        }
-        .screen {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            background: rgba(26, 26, 46, 0.95);
-            z-index: 10;
-        }
+        body { background: #1a1a2e; overflow: hidden; font-family: sans-serif; }
+        #gameCanvas { display: block; }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(26,26,46,0.95); z-index: 10; }
         .hidden { display: none !important; }
-        h1 { font-size: clamp(32px, 8vw, 64px); color: #fff; margin-bottom: 20px; text-shadow: 0 0 30px rgba(255, 107, 107, 0.5); }
-        .subtitle { color: #888; margin-bottom: 30px; font-size: 18px; }
-        .btn {
-            padding: 20px 60px;
-            font-size: clamp(18px, 4vw, 24px);
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-            border: none;
-            border-radius: 50px;
-            color: #fff;
-            cursor: pointer;
-            box-shadow: 0 10px 40px rgba(255, 107, 107, 0.4);
-            transition: transform 0.1s;
-        }
-        .btn:active { transform: scale(0.95); }
-        .btn-purple { background: linear-gradient(135deg, #6c5ce7, #a29bfe); box-shadow: 0 10px 40px rgba(108, 92, 231, 0.4); }
-        #hud {
-            position: absolute;
-            top: 20px; left: 20px; right: 20px;
-            display: none;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: none;
-            z-index: 5;
-        }
-        .score-row { display: flex; justify-content: space-between; gap: 15px; }
-        .score-box {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            padding: 12px 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            flex: 1;
-        }
-        .score-label { color: #888; font-size: 14px; }
-        .score-value { color: #fff; font-size: 24px; font-weight: bold; }
-        #gameOverScreen h2 { color: #ff6b6b; font-size: 48px; margin-bottom: 20px; }
-        #finalScore { color: #fff; font-size: 32px; margin-bottom: 30px; }
+        h1 { font-size: 48px; color: #fff; margin-bottom: 20px; }
+        .btn { padding: 15px 50px; font-size: 20px; background: linear-gradient(135deg,#ff6b6b,#ee5a24); border: none; border-radius: 30px; color: #fff; cursor: pointer; margin: 10px; }
+        .btn2 { background: linear-gradient(135deg,#6c5ce7,#a29bfe); }
+        #hud { position: absolute; top: 15px; left: 15px; right: 15px; display: none; justify-content: space-between; pointer-events: none; z-index: 5; }
+        .score { background: rgba(0,0,0,0.5); padding: 10px 20px; border-radius: 10px; color: #fff; }
+        .score label { color: #888; font-size: 12px; }
+        .score span { font-size: 24px; font-weight: bold; }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
     
-    <!-- 开始界面 -->
     <div id="startScreen" class="screen">
         <h1>方块吞噬者</h1>
-        <p class="subtitle">吃掉绿色小球，躲避红色大球！</p>
-        <button id="startBtn" class="btn">▶ 开始游戏</button>
+        <p style="color:#888;margin-bottom:30px;">吃掉绿色，躲避红色！</p>
+        <button id="startBtn" class="btn">开始游戏</button>
     </div>
     
-    <!-- 游戏界面 -->
     <div id="hud">
-        <div class="score-row">
-            <div class="score-box">
-                <div class="score-label">分数</div>
-                <div class="score-value" id="score">0</div>
-            </div>
-            <div class="score-box">
-                <div class="score-label">最高分</div>
-                <div class="score-value" id="highScore">0</div>
-            </div>
-        </div>
+        <div class="score"><label>分数</label><br><span id="scoreEl">0</span></div>
+        <div class="score"><label>最高</label><br><span id="highEl">0</span></div>
     </div>
     
-    <!-- 游戏结束界面 -->
     <div id="gameOverScreen" class="screen hidden">
-        <h2>游戏结束</h2>
-        <div id="finalScore">得分: 0</div>
-        <button id="restartBtn" class="btn btn-purple">再来一局</button>
+        <h1 style="color:#ff6b6b;">游戏结束</h1>
+        <p id="finalScore" style="color:#fff;font-size:24px;margin:20px 0;">得分: 0</p>
+        <button id="restartBtn" class="btn btn2">再来一局</button>
     </div>
 
     <script>
-        // ========== 游戏核心 ==========
+    (function() {
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         
-        // 自适应画布
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -111,42 +51,31 @@
         resize();
         window.addEventListener('resize', resize);
         
-        // 游戏状态
-        let gameState = 'start';
+        // 游戏变量
+        let state = 'start'; // start, playing, gameover
         let score = 0;
-        let highScore = parseInt(localStorage.getItem('blockEater_highScore')) || 0;
-        let animationId = null;
+        let highScore = parseInt(localStorage.getItem('bh_high')) || 0;
         
-        // 玩家
-        const player = {
-            x: canvas.width / 2,
-            y: canvas.height / 2,
-            size: 20,
-            baseSize: 20,
-            color: '#ff6b6b',
-            targetX: canvas.width / 2,
-            targetY: canvas.height / 2,
-            speed: 8
-        };
-        
-        // 敌人列表
+        const player = { x: 0, y: 0, size: 20, color: '#ff6b6b', tx: 0, ty: 0 };
         let enemies = [];
-        
-        // 粒子列表
         let particles = [];
+        let popups = [];
+        let lastTime = 0;
         
-        // 分数弹出列表
-        let scorePopups = [];
+        // DOM 元素
+        const startScreen = document.getElementById('startScreen');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const hud = document.getElementById('hud');
+        const scoreEl = document.getElementById('scoreEl');
+        const highEl = document.getElementById('highEl');
+        const finalScore = document.getElementById('finalScore');
         
-        // 更新高分显示
-        document.getElementById('highScore').textContent = highScore;
+        highEl.textContent = highScore;
         
         // 生成敌人
         function spawnEnemy() {
             const size = 15 + Math.random() * 35;
             const isDangerous = size > player.size;
-            
-            // 从屏幕边缘随机位置生成
             let x, y;
             if (Math.random() < 0.5) {
                 x = Math.random() < 0.5 ? -size : canvas.width + size;
@@ -155,286 +84,187 @@
                 x = Math.random() * canvas.width;
                 y = Math.random() < 0.5 ? -size : canvas.height + size;
             }
-            
-            // 随机移动方向
             const angle = Math.random() * Math.PI * 2;
             const speed = 1.5 + Math.random() * 2;
-            
             enemies.push({
-                x: x,
-                y: y,
-                size: size,
+                x: x, y: y, size: size,
                 color: isDangerous ? '#ee5a24' : '#4ade80',
                 vx: Math.cos(angle) * speed,
-                vy: Math.sin(angle) * speed,
-                speed: speed
+                vy: Math.sin(angle) * speed
             });
         }
         
-        // 粒子效果
-        function createParticles(x, y, color) {
-            for (let i = 0; i < 8; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 2 + Math.random() * 4;
-                particles.push({
-                    x: x, y: y,
-                    vx: Math.cos(angle) * speed,
-                    vy: Math.sin(angle) * speed,
-                    size: 2 + Math.random() * 4,
-                    color: color,
-                    life: 1
-                });
+        // 粒子
+        function addParticles(x, y, color) {
+            for (let i = 0; i < 6; i++) {
+                const a = Math.random() * Math.PI * 2;
+                const s = 2 + Math.random() * 3;
+                particles.push({ x, y, vx: Math.cos(a)*s, vy: Math.sin(a)*s, size: s, color, life: 1 });
             }
         }
         
         // 分数弹出
-        function createScorePopup(x, y, value) {
-            scorePopups.push({
-                x: x, y: y,
-                value: '+' + value,
-                life: 1,
-                vy: -2
-            });
+        function addPopup(x, y, v) {
+            popups.push({ x, y, v: '+' + v, life: 1, vy: -2 });
         }
         
-        // 生成初始敌人
-        function spawnInitialEnemies() {
-            for (let i = 0; i < 8; i++) {
-                spawnEnemy();
-            }
-        }
-        
-        // 游戏循环
-        let lastTime = 0;
-        let spawnTimer = 0;
-        
-        function gameLoop(timestamp) {
-            const deltaTime = timestamp - lastTime || 16;
-            lastTime = timestamp;
+        // 开始游戏
+        function startGame() {
+            state = 'playing';
+            score = 0;
+            player.x = canvas.width / 2;
+            player.y = canvas.height / 2;
+            player.tx = player.x;
+            player.ty = player.y;
+            player.size = 20;
+            enemies = [];
+            particles = [];
+            popups = [];
+            lastTime = 0;
             
-            // 清空画布
+            for (let i = 0; i < 8; i++) spawnEnemy();
+            
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            hud.style.display = 'flex';
+            scoreEl.textContent = '0';
+        }
+        
+        // 结束游戏
+        function endGame() {
+            state = 'gameover';
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('bh_high', highScore);
+                highEl.textContent = highScore;
+            }
+            finalScore.textContent = '得分: ' + score;
+            gameOverScreen.classList.remove('hidden');
+            hud.style.display = 'none';
+        }
+        
+        // 主循环
+        function loop(time) {
+            const dt = time - lastTime || 16;
+            lastTime = time;
+            
+            // 背景
             ctx.fillStyle = '#1a1a2e';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // 绘制背景渐变
-            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, '#1a1a2e');
-            gradient.addColorStop(1, '#16213e');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            if (gameState !== 'playing') {
-                animationId = requestAnimationFrame(gameLoop);
-                return;
-            }
-            
-            // 生成敌人
-            spawnTimer += deltaTime;
-            if (spawnTimer > 600 && enemies.length < 20) {
-                spawnEnemy();
-                spawnTimer = 0;
-            }
-            
-            // 玩家移动 (平滑插值)
-            player.x += (player.targetX - player.x) * 0.12;
-            player.y += (player.targetY - player.y) * 0.12;
-            
-            // 边界检查
-            player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
-            player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
-            
-            // 更新敌人
-            for (let i = enemies.length - 1; i >= 0; i--) {
-                const enemy = enemies[i];
+            if (state === 'playing') {
+                // 玩家移动
+                player.x += (player.tx - player.x) * 0.12;
+                player.y += (player.ty - player.y) * 0.12;
+                player.x = Math.max(player.size, Math.min(canvas.width - player.size, player.x));
+                player.y = Math.max(player.size, Math.min(canvas.height - player.size, player.y));
                 
-                // 移动
-                enemy.x += enemy.vx;
-                enemy.y += enemy.vy;
+                // 生成敌人
+                if (enemies.length < 15 && Math.random() < 0.02) spawnEnemy();
                 
-                // 边界反弹
-                if (enemy.x < -enemy.size * 2 || enemy.x > canvas.width + enemy.size * 2) {
-                    enemy.vx *= -1;
-                }
-                if (enemy.y < -enemy.size * 2 || enemy.y > canvas.height + enemy.size * 2) {
-                    enemy.vy *= -1;
-                }
-                
-                // 碰撞检测
-                const dx = player.x - enemy.x;
-                const dy = player.y - enemy.y;
-                const dist = Math.sqrt(dx * dx + dy * dy);
-                const collisionDist = player.size + enemy.size;
-                
-                if (dist < collisionDist) {
-                    if (player.size >= enemy.size) {
-                        // 吃掉！
-                        score += Math.floor(enemy.size);
-                        player.size += enemy.size * 0.08;
-                        createParticles(enemy.x, enemy.y, enemy.color);
-                        createScorePopup(enemy.x, enemy.y, Math.floor(enemy.size));
-                        
-                        // 更新敌人颜色（根据新大小）
-                        if (enemy.size > player.size) {
-                            enemy.color = '#ee5a24';
+                // 更新敌人
+                for (let i = enemies.length - 1; i >= 0; i--) {
+                    const e = enemies[i];
+                    e.x += e.vx;
+                    e.y += e.vy;
+                    
+                    // 反弹
+                    if (e.x < -50 || e.x > canvas.width + 50) e.vx *= -1;
+                    if (e.y < -50 || e.y > canvas.height + 50) e.vy *= -1;
+                    
+                    // 碰撞
+                    const dx = player.x - e.x;
+                    const dy = player.y - e.y;
+                    const dist = Math.sqrt(dx*dx + dy*dy);
+                    
+                    if (dist < player.size + e.size) {
+                        if (player.size >= e.size) {
+                            score += Math.floor(e.size);
+                            player.size += e.size * 0.08;
+                            addParticles(e.x, e.y, e.color);
+                            addPopup(e.x, e.y, Math.floor(e.size));
+                            enemies.splice(i, 1);
+                            scoreEl.textContent = score;
+                        } else {
+                            endGame();
                         }
-                        
-                        enemies.splice(i, 1);
-                    } else {
-                        // 游戏结束！
-                        doGameOver();
-                        return;
                     }
                 }
                 
                 // 绘制敌人
+                enemies.forEach(e => {
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.size, 0, Math.PI * 2);
+                    ctx.fillStyle = e.color;
+                    ctx.fill();
+                });
+                
+                // 绘制玩家
                 ctx.beginPath();
-                ctx.arc(enemy.x, enemy.y, enemy.size, 0, Math.PI * 2);
-                ctx.fillStyle = enemy.color;
+                ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
+                ctx.fillStyle = player.color;
                 ctx.fill();
                 
-                // 敌人光晕
-                ctx.shadowBlur = 10;
-                ctx.shadowColor = enemy.color;
+                // 粒子
+                particles = particles.filter(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.life -= 0.03;
+                    if (p.life <= 0) return false;
+                    ctx.globalAlpha = p.life;
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.fill();
+                    return true;
+                });
+                ctx.globalAlpha = 1;
+                
+                // 分数弹出
+                popups = popups.filter(p => {
+                    p.y += p.vy;
+                    p.life -= 0.02;
+                    if (p.life <= 0) return false;
+                    ctx.globalAlpha = p.life;
+                    ctx.font = 'bold 18px sans-serif';
+                    ctx.fillStyle = '#fff';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(p.v, p.x, p.y);
+                    return true;
+                });
+                ctx.globalAlpha = 1;
             }
-            ctx.shadowBlur = 0;
             
-            // 绘制玩家
-            ctx.beginPath();
-            ctx.arc(player.x, player.y, player.size, 0, Math.PI * 2);
-            ctx.fillStyle = player.color;
-            ctx.fill();
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = player.color;
-            ctx.shadowBlur = 0;
-            
-            // 更新粒子
-            for (let i = particles.length - 1; i >= 0; i--) {
-                const p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.life -= 0.03;
-                if (p.life <= 0) {
-                    particles.splice(i, 1);
-                    continue;
-                }
-                ctx.globalAlpha = p.life;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-                ctx.fillStyle = p.color;
-                ctx.fill();
-            }
-            ctx.globalAlpha = 1;
-            
-            // 更新分数弹出
-            for (let i = scorePopups.length - 1; i >= 0; i--) {
-                const s = scorePopups[i];
-                s.y += s.vy;
-                s.life -= 0.02;
-                if (s.life <= 0) {
-                    scorePopups.splice(i, 1);
-                    continue;
-                }
-                ctx.globalAlpha = s.life;
-                ctx.font = 'bold 20px sans-serif';
-                ctx.fillStyle = '#fff';
-                ctx.textAlign = 'center';
-                ctx.fillText(s.value, s.x, s.y);
-            }
-            ctx.globalAlpha = 1;
-            
-            // 更新分数显示
-            document.getElementById('score').textContent = score;
-            
-            animationId = requestAnimationFrame(gameLoop);
+            requestAnimationFrame(loop);
         }
         
-        // 开始游戏
-        function doStartGame() {
-            console.log('开始游戏!');
-            gameState = 'playing';
-            score = 0;
-            player.x = canvas.width / 2;
-            player.y = canvas.height / 2;
-            player.size = player.baseSize;
-            player.targetX = player.x;
-            player.targetY = player.y;
-            enemies = [];
-            particles = [];
-            scorePopups = [];
-            spawnTimer = 0;
-            
-            // 生成初始敌人
-            spawnInitialEnemies();
-            
-            // 隐藏所有屏幕，显示HUD
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('gameOverScreen').classList.add('hidden');
-            document.getElementById('hud').style.display = 'flex';
-            
-            // 确保游戏循环运行
-            if (!animationId) {
-                animationId = requestAnimationFrame(gameLoop);
-            }
-        }
-        
-        // 游戏结束
-        function doGameOver() {
-            console.log('游戏结束!');
-            gameState = 'gameover';
-            
-            // 更新最高分
-            if (score > highScore) {
-                highScore = score;
-                localStorage.setItem('blockEater_highScore', highScore);
-                document.getElementById('highScore').textContent = highScore;
-            }
-            
-            // 显示结束画面
-            document.getElementById('finalScore').textContent = '得分: ' + score;
-            document.getElementById('gameOverScreen').classList.remove('hidden');
-            document.getElementById('hud').style.display = 'none';
-        }
-        
-        // 鼠标/触摸控制
-        canvas.addEventListener('mousemove', (e) => {
-            if (gameState === 'playing') {
-                player.targetX = e.clientX;
-                player.targetY = e.clientY;
+        // 事件
+        canvas.addEventListener('mousemove', e => {
+            if (state === 'playing') {
+                player.tx = e.clientX;
+                player.ty = e.clientY;
             }
         });
         
-        canvas.addEventListener('touchmove', (e) => {
+        canvas.addEventListener('touchmove', e => {
             e.preventDefault();
-            if (gameState === 'playing') {
-                player.targetX = e.touches[0].clientX;
-                player.targetY = e.touches[0].clientY;
+            if (state === 'playing') {
+                player.tx = e.touches[0].clientX;
+                player.ty = e.touches[0].clientY;
             }
-        }, { passive: false });
+        }, {passive: false});
         
-        // 按钮事件
-        document.getElementById('startBtn').addEventListener('click', function() {
-            console.log('开始按钮点击');
-            doStartGame();
-        });
+        document.getElementById('startBtn').onclick = startGame;
+        document.getElementById('restartBtn').onclick = startGame;
         
-        document.getElementById('restartBtn').addEventListener('click', function() {
-            console.log('再来一局按钮点击');
-            doStartGame();
-        });
-        
-        // 键盘空格键开始/重启
-        document.addEventListener('keydown', (e) => {
-            if (e.code === 'Space') {
-                if (gameState === 'start' || gameState === 'gameover') {
-                    doStartGame();
-                }
+        document.addEventListener('keydown', e => {
+            if (e.code === 'Space' && (state === 'start' || state === 'gameover')) {
+                startGame();
             }
         });
         
-        // 启动游戏循环
-        animationId = requestAnimationFrame(gameLoop);
-        
-        console.log('游戏已加载完成');
+        requestAnimationFrame(loop);
+    })();
     </script>
 </body>
 </html>
