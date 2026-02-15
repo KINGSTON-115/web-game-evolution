@@ -257,8 +257,7 @@
                             enemies.splice(i, 1);
                         } else {
                             // 游戏结束！
-                            gameOver();
-                            return;
+                            gameState = 'gameover';
                         }
                     }
                     
@@ -335,6 +334,12 @@
             enemies = [];
             particles = [];
             scorePopups = [];
+            spawnTimer = 0;
+            
+            // 初始生成一些敌人
+            for (let i = 0; i < 10; i++) {
+                spawnEnemy();
+            }
             
             document.getElementById('startScreen').style.display = 'none';
             document.getElementById('gameOverScreen').style.display = 'none';
